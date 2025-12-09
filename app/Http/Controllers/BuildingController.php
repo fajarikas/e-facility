@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Room;
+use App\Models\Building;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BuildingController extends Controller
 {
@@ -12,7 +13,10 @@ class BuildingController extends Controller
      */
     public function index()
     {
-        //
+        $buildings = Building::paginate(10);
+        return Inertia::render('buildings/index', [
+            'data' => $buildings,
+        ]);
     }
 
     /**
@@ -20,7 +24,7 @@ class BuildingController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('buildings/create');
     }
 
     /**
@@ -34,7 +38,7 @@ class BuildingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Room $room)
+    public function show(Building $room)
     {
         //
     }
@@ -42,7 +46,7 @@ class BuildingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Room $room)
+    public function edit(Building $room)
     {
         //
     }
@@ -50,7 +54,7 @@ class BuildingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Room $room)
+    public function update(Request $request, Building $room)
     {
         //
     }
@@ -58,7 +62,7 @@ class BuildingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Room $room)
+    public function destroy(Building $room)
     {
         //
     }
