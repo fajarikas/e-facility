@@ -27,11 +27,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const Buildings = ({ data }: { data: PaginatedData }) => {
-    // --- State Baru untuk Modal Sukses ---
     const [isSuccessModalOpen, setIsSuccessModalOpen] =
         useState<boolean>(false);
     const [successMessage, setSuccessMessage] = useState<string>('');
-    // -------------------------------------
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [editingBuilding, setEditingBuilding] = useState<Building | null>(
         null,
@@ -237,7 +235,6 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                     building={editingBuilding}
                 />
             )}
-            {/* --- Modal Konfirmasi Hapus --- */}
             <Modal
                 isOpen={isConfirmOpen}
                 onClose={() => setIsConfirmOpen(false)}
@@ -262,9 +259,7 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                     </Button>
                 </div>
             </Modal>
-            {/* ---------------------------------- */}
 
-            {/* --- Modal Berhasil Dihapus (Success) --- */}
             <Modal
                 isOpen={isSuccessModalOpen}
                 onClose={() => setIsSuccessModalOpen(false)}
@@ -277,7 +272,6 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                     </Button>
                 </div>
             </Modal>
-            {/* ------------------------------------------ */}
         </AppLayout>
     );
 };

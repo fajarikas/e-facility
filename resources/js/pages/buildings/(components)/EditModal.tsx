@@ -1,6 +1,6 @@
 import Modal from '@/components/modals';
 import { Button } from '@/components/ui/button';
-import { Building } from '@/types/buildings'; // Pastikan path ini benar
+import { Building } from '@/types/buildings';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect } from 'react';
 import Toastify from 'toastify-js';
@@ -10,20 +10,17 @@ type Props = {
     isOpen: boolean;
     onClose: () => void;
     title: string;
-    building: Building; // Data bangunan yang akan diedit
+    building: Building;
     widthClass?: string;
 };
 
 const EditModal = ({ isOpen, onClose, building }: Props) => {
-    // 1. Inisialisasi useForm dengan nilai awal dari 'building'
     const { data, setData, put, processing, errors, reset } = useForm({
         name: building.name,
         bmn_type: building.bmn_type,
         address: building.address,
     });
 
-    // 2. Gunakan useEffect untuk reset form saat modal dibuka/data berubah
-    // Hal ini penting agar form kembali ke nilai awal bangunan yang benar
     useEffect(() => {
         if (building) {
             setData({
@@ -37,8 +34,6 @@ const EditModal = ({ isOpen, onClose, building }: Props) => {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        // 3. Gunakan metode 'put' (atau 'patch') dan arahkan ke endpoint update
-        // URL-nya harus mencakup ID bangunan: `/buildings/{id}`
         put(`/buildings/${building.id}`, {
             onSuccess: () => {
                 Toastify({
@@ -50,11 +45,10 @@ const EditModal = ({ isOpen, onClose, building }: Props) => {
                     position: 'left',
                     stopOnFocus: true,
                     style: {
-                        background: '#1A5319', // Warna hijau berbeda untuk update
+                        background: '#1A5319',
                     },
                     onClick: function () {},
                 }).showToast();
-                // Tidak perlu reset, tapi tutup modal
                 onClose();
             },
             onError: (err) => {
@@ -89,7 +83,6 @@ const EditModal = ({ isOpen, onClose, building }: Props) => {
                         onChange={(e) => setData('name', e.target.value)}
                         className="w-full rounded-lg border border-[#454545]/60 px-5 py-2 focus:outline-[#454545]/90"
                     />
-                    {/* Tampilkan error validasi dari backend */}
                     {errors.name && (
                         <p className="text-sm text-red-600">{errors.name}</p>
                     )}
