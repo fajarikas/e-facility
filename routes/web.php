@@ -17,6 +17,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::get('buildings', [BuildingController::class, 'index'])->name('buildings');
     Route::get('buildings/create', [BuildingController::class, 'create'])->name('buildings.create');
+    Route::post('buildings', [BuildingController::class, 'store'])->name('buildings.store');
+    Route::delete('buildings/{building}', [BuildingController::class, 'destroy'])->name('buildings.destroy');
+    Route::get('buildings/{building}', [BuildingController::class, 'show'])->name('buildings.show');
+    Route::put('buildings/{building}', [BuildingController::class, 'update'])->name('buildings.update');
 });
 
 

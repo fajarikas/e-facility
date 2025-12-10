@@ -15,11 +15,7 @@ interface LoginProps {
     canRegister: boolean;
 }
 
-export default function Login({
-    status,
-    canResetPassword,
-    canRegister,
-}: LoginProps) {
+export default function Login({ status, canRegister }: LoginProps) {
     return (
         // <AuthLayout
         //     title="Log in to your account"

@@ -26,7 +26,7 @@ const PaginationLinks: React.FC<PaginationLinksProps> = ({ links, from, to, tota
 
     return (
         <div className="py-4 flex flex-col justify-center w-full items-center">
-            
+            <div className="mb-2 text-sm text-gray-600">Menampilkan {from} &ndash; {to} dari {total}</div>
 
             <div className="flex flex-wrap gap-1">
                 {processedLinks.map((link, index) => (
