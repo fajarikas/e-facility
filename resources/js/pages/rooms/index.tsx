@@ -115,7 +115,7 @@ const index = ({ data }: { data: PaginatedRoomData }) => {
                                                 <td className="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-700">
                                                     {item.area} m²
                                                 </td>
-                                                <td className="line-clamp-3` max-w-xs overflow-hidden px-6 py-4 text-sm text-ellipsis text-gray-700">
+                                                <td className="line-clamp-3 max-w-xs overflow-hidden px-6 py-4 text-sm text-ellipsis text-gray-700">
                                                     {item.description}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-medium text-gray-800">
