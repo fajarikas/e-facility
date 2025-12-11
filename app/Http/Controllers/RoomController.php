@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class RoomController extends Controller
 {
@@ -12,7 +13,11 @@ class RoomController extends Controller
      */
     public function index()
     {
-        //
+        $room = Room::with('building')->latest()->paginate(10);
+
+        return Inertia::render('rooms/index', [
+            'data' => $room
+        ]);
     }
 
     /**

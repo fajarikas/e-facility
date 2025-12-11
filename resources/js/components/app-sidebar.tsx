@@ -9,10 +9,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { buildings, dashboard } from '@/routes';
+import { buildings, dashboard, rooms } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Building, LayoutGrid } from 'lucide-react';
+import { BedDouble, Building, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -25,6 +25,11 @@ const mainNavItems: NavItem[] = [
         title: 'Bangunan',
         href: buildings(),
         icon: Building,
+    },
+    {
+        title: 'Ruangan',
+        href: rooms(),
+        icon: BedDouble,
     },
 ];
 
