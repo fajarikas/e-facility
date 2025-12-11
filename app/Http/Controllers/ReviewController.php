@@ -10,9 +10,19 @@ class ReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $reviews = Review::with('users')->latest()->paginate(10);
+
+        return Intertia::render('reviews/index', [
+            'data' => $reviews
+        ]);
+
+        $reviews = Review::with('rooms')->latest()->paginate(10);
+
+        return Intertia::render('reviews/index', [
+            'data' => $reviews
+        ]);
     }
 
     /**
