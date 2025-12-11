@@ -12,17 +12,12 @@ class ReviewController extends Controller
      */
     public function index(Request $request)
     {
-        $reviews = Review::with('users')->latest()->paginate(10);
+        $reviews = Review::with('users', 'rooms')->latest()->paginate(10);
 
         return Intertia::render('reviews/index', [
             'data' => $reviews
         ]);
 
-        $reviews = Review::with('rooms')->latest()->paginate(10);
-
-        return Intertia::render('reviews/index', [
-            'data' => $reviews
-        ]);
     }
 
     /**
