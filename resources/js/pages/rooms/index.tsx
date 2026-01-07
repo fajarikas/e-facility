@@ -1,14 +1,25 @@
+import Modal from '@/components/modals';
 import { Button } from '@/components/ui/button';
 import PaginationLinks from '@/components/ui/pagination-link';
 import AppLayout from '@/layouts/app-layout';
 import { rooms } from '@/routes';
 import { BreadcrumbItem } from '@/types';
-import { PaginatedRoomData } from '@/types/rooms';
-import { Head } from '@inertiajs/react';
+import { Building } from '@/types/buildings';
+import { PaginatedRoomData, RoomData } from '@/types/rooms';
+import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { IoMdEye, IoMdTrash } from 'react-icons/io';
 import { MdEditDocument } from 'react-icons/md';
+import Toastify from 'toastify-js';
+import 'toastify-js/src/toastify.css';
+import CreateRoomModal from './(components)/CreateModal';
+import DetailRoomModal from './(components)/DetailModal';
+import EditRoomModal from './(components)/EditModal';
 
-type Props = {};
+type Props = {
+    data: PaginatedRoomData;
+    buildings: Building[];
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,8 +28,62 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const index = ({ data }: { data: PaginatedRoomData }) => {
+const index = ({ data, buildings }: Props) => {
+    console.log('🚀 ~ index ~ data:', data);
+    console.log('🚀 ~ index ~ buildings:', buildings);
     const roomData = data.data;
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingRoom, setEditingRoom] = useState<RoomData | null>(null);
+    const [isRoomDetailOpen, setIsRoomDetailOpen] = useState(false);
+    const [selectedRoom, setSelectedRoom] = useState<RoomData | null>(null);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
+    const openConfirm = (id: number | string) => {
+        setPendingDeleteId(Number(id));
+        setIsConfirmOpen(true);
+    };
+
+    const handleEdit = (room: RoomData) => {
+        setEditingRoom(room);
+        setIsEditModalOpen(true);
+    };
+
+    const handleDelete = (id: number | string) => {
+        setDeletingId(Number(id));
+        router.delete(`/rooms/${id}`, {
+            preserveState: true,
+            onFinish: () => setDeletingId(null),
+            onSuccess: () => {
+                Toastify({
+                    text: 'Ruangan berhasil dihapus',
+                    duration: 3000,
+                    newWindow: true,
+                    close: true,
+                    gravity: 'top',
+                    position: 'left',
+                    stopOnFocus: true,
+                    style: {
+                        background: '#007E6E',
+                    },
+                }).showToast();
+            },
+        });
+    };
+
+    const confirmDelete = () => {
+        if (pendingDeleteId === null) return;
+        setIsConfirmOpen(false);
+        handleDelete(pendingDeleteId);
+        setPendingDeleteId(null);
+    };
+
+    const handleShowDetail = (room: RoomData) => {
+        setSelectedRoom(room);
+        setIsRoomDetailOpen(true);
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -29,7 +94,7 @@ const index = ({ data }: { data: PaginatedRoomData }) => {
                     <h1 className="text-2xl font-bold text-gray-800">
                         Daftar Ruangan
                     </h1>
-                    <Button onClick={() => console.log()}>
+                    <Button onClick={() => setIsCreateModalOpen(true)}>
                         Tambah Ruangan
                     </Button>
                 </div>
@@ -79,16 +144,16 @@ const index = ({ data }: { data: PaginatedRoomData }) => {
                                                 key={item.id}
                                                 className="transition duration-150 ease-in-out hover:bg-blue-50/50"
                                             >
-                                                {/* Kolom Aksi (DETAIL - Tetap di sini) */}
-                                                <td
-                                                    // onClick={() =>
-                                                    //     handleShowDetail(item)
-                                                    // }
-                                                    className="sticky left-0 cursor-pointer bg-white px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 hover:bg-blue-50/50"
-                                                >
+                                                {/* Kolom Aksi (DETAIL) */}
+                                                <td className="sticky left-0 cursor-pointer bg-white px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 hover:bg-blue-50/50">
                                                     <IoMdEye
                                                         size={20}
                                                         className="text-gray-600 transition hover:text-blue-500"
+                                                        onClick={() =>
+                                                            handleShowDetail(
+                                                                item,
+                                                            )
+                                                        }
                                                     />
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-medium text-gray-900">
@@ -133,7 +198,9 @@ const index = ({ data }: { data: PaginatedRoomData }) => {
                                                 >
                                                     <button
                                                         type="button"
-                                                        // onClick={() => handleEdit(item)}
+                                                        onClick={() =>
+                                                            handleEdit(item)
+                                                        }
                                                         className={`inline-flex cursor-pointer items-center rounded-full font-medium transition hover:scale-110`}
                                                         title="Edit"
                                                     >
@@ -144,11 +211,13 @@ const index = ({ data }: { data: PaginatedRoomData }) => {
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        // onClick={() => openConfirm(item.id)}
-                                                        // disabled={
-                                                        //     deletingId ===
-                                                        //     Number(item.id)
-                                                        // }
+                                                        onClick={() =>
+                                                            openConfirm(item.id)
+                                                        }
+                                                        disabled={
+                                                            deletingId ===
+                                                            Number(item.id)
+                                                        }
                                                         className={`inline-flex cursor-pointer items-center rounded-full font-medium transition hover:scale-110 disabled:opacity-50`}
                                                         title="Hapus"
                                                     >
@@ -186,6 +255,54 @@ const index = ({ data }: { data: PaginatedRoomData }) => {
                     />
                 )}
             </div>
+
+            <CreateRoomModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                buildings={buildings}
+            />
+
+            {isEditModalOpen && editingRoom && (
+                <EditRoomModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    room={editingRoom}
+                    buildings={buildings}
+                />
+            )}
+
+            {isRoomDetailOpen && (
+                <DetailRoomModal
+                    isOpen={isRoomDetailOpen}
+                    onClose={() => setIsRoomDetailOpen(false)}
+                    room={selectedRoom}
+                />
+            )}
+
+            <Modal
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                title="Konfirmasi Hapus"
+            >
+                <p>
+                    Apakah Anda yakin ingin menghapus ruangan ini? Tindakan
+                    tidak dapat dibatalkan.
+                </p>
+                <div className="mt-4 flex justify-end gap-2">
+                    <Button
+                        variant="secondary"
+                        onClick={() => setIsConfirmOpen(false)}
+                    >
+                        Batal
+                    </Button>
+                    <Button
+                        onClick={confirmDelete}
+                        disabled={deletingId !== null}
+                    >
+                        Hapus
+                    </Button>
+                </div>
+            </Modal>
         </AppLayout>
     );
 };

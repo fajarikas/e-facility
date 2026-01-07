@@ -10,13 +10,13 @@ export interface RoomData {
     description: string;
     building_id: number;
     building: Building;
+    images: string[];
 }
 
 export interface PaginationLink {
     active: boolean;
     label: string;
-    page: number;
-    url: string;
+    url: string | null;
 }
 
 export interface PaginatedRoomData {

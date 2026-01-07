@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Database\Factories\BuildingFactory;
 use Database\Factories\RoomFactory;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -18,6 +17,7 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         BuildingFactory::new()->count(30)->create();
         RoomFactory::new()->count(100)->create();
+        $this->call(AdminUserSeeder::class);
         // User::firstOrCreate(
         //     ['email' => 'test@example.com'],
         //     [

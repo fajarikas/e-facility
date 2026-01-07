@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
+
+    protected $casts = [
+        'images' => 'array',
+    ];
     protected $fillable = [
         "name",
         "price",
@@ -15,7 +19,8 @@ class Room extends Model
         "toilet_count",
         "area",
         "description",
-        "building_id"
+        "building_id",
+        "images"
     ];
 
     public function building(): BelongsTo

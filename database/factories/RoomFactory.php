@@ -2,7 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\Building;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Room>
@@ -16,14 +19,32 @@ class RoomFactory extends Factory
      */
     public function definition(): array
     {
+        $baseImage = public_path('images/login/preview.webp');
+        if (!file_exists($baseImage)) {
+            $baseImage = public_path('images/logo/bpmp.webp');
+        }
+
+        $images = [];
+        $imageCount = $this->faker->numberBetween(1, 4);
+        $imageContents = file_exists($baseImage) ? file_get_contents($baseImage) : null;
+
+        for ($i = 0; $i < $imageCount; $i++) {
+            $filename = 'room_images/' . Str::uuid() . '.webp';
+            if ($imageContents) {
+                Storage::disk('public')->put($filename, $imageContents);
+                $images[] = $filename;
+            }
+        }
+
         return [
             'name' => $this->faker->country(),
-            'price' => $this->faker->randomFloat(2, 10, 1000),
+            'price' => $this->faker->numberBetween(100000, 2000000),
             'capacity_count' => $this->faker->numberBetween(1, 20),
             'toilet_count' => $this->faker->numberBetween(1, 3),
             'area' => $this->faker->numberBetween(50, 100),
             'description' => $this->faker->sentence(30, true),
-            'building_id' => $this->faker->numberBetween(1, 30)
+            'building_id' => Building::inRandomOrder()->value('id'),
+            'images' => $images,
         ];
     }
 }
