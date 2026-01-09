@@ -4,6 +4,7 @@ use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\WelcomeController;
 use App\Models\Building;
 use App\Models\Room;
 use App\Models\Transaction;
@@ -11,11 +12,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
+// Route::get('/', function () {
+//     return Inertia::render('welcome', [
+//         'canRegister' => Features::enabled(Features::registration()),
+//     ]);
+// })->name('home');
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin,superadmin'])->group(function () {
