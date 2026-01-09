@@ -1,21 +1,26 @@
 import InputField from '@/components/custom/input';
+import FindYourBest from '@/components/page/main/find-your-best';
+import Popular from '@/components/page/main/popular';
 import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
 import { Building } from '@/types/buildings';
+import { RoomData } from '@/types/rooms';
 import { Combobox } from '@headlessui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { BsPeopleFill } from 'react-icons/bs';
 import { FaRupiahSign } from 'react-icons/fa6';
+import { SlCalender } from 'react-icons/sl';
 import { TbBuildingSkyscraper } from 'react-icons/tb';
-import { BsPeopleFill } from "react-icons/bs";
-import { SlCalender } from "react-icons/sl";
 
 export default function Welcome({
     canRegister = true,
     buildings,
+    rooms,
 }: {
     canRegister?: boolean;
     buildings: Building[];
+    rooms: RoomData[];
 }) {
     const { auth } = usePage<SharedData>().props;
     const [buildingQuery, setBuildingQuery] = useState('');
@@ -27,8 +32,7 @@ export default function Welcome({
         null,
     );
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    console.log('🚀 ~ Welcome ~ selectedDate:', selectedDate);
-    console.log(selectedCapacity)
+    console.log(selectedCapacity);
 
     const filteredBuildings = useMemo(() => {
         const query = buildingQuery.trim().toLowerCase();
@@ -48,12 +52,9 @@ export default function Welcome({
                 />
             </Head>
             <div className="min-h-screen w-full bg-[#FDFDFC] font-poppins text-[#1b1b18] dark:bg-[#0a0a0a]">
-                {/* WRAPPER */}
                 <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-                    {/* HEADER */}
                     <header className="mb-6 text-sm lg:mb-12 lg:text-base">
                         <div className="flex items-center justify-between gap-3">
-                            {/* KIRI: LOGO */}
                             <div className="flex shrink-0 items-center gap-2">
                                 <img
                                     src="/images/logo/bpmp.webp"
@@ -65,7 +66,6 @@ export default function Welcome({
                                 </span>
                             </div>
 
-                            {/* KANAN: TOMBOL */}
                             <nav className="flex items-center gap-2 sm:gap-4">
                                 {auth.user ? (
                                     <Link
@@ -99,26 +99,7 @@ export default function Welcome({
 
                     {/* MAIN */}
                     <main className="flex flex-col gap-4 lg:gap-6">
-                        <h1 className="text-center text-[16px] font-bold lg:text-3xl dark:text-[#EDEDEC]">
-                            Cari Fasilitas Terbaik Pilihamnu
-                        </h1>
-
-                        <p className="text-center text-[12px] text-[#7a7a7a] lg:text-sm">
-                            Platform Resmi dan Terpercaya untuk Penyewaan
-                            Fasilitas Instansi BPMP Provinsi Kepulauan Bangka
-                            Belitung
-                        </p>
-
-                        <div className="relative w-full overflow-hidden rounded-2xl">
-                            <img
-                                src="/images/landingpage/contoh.webp"
-                                alt="Illustration Welcome"
-                                className="h-auto w-full"
-                            />
-                            <span className="absolute right-3 bottom-2 text-[10px] text-white/80">
-                                © 2026 BPMP Provinsi Kepulauan Bangka Belitung
-                            </span>
-                        </div>
+                        <FindYourBest />
                         <form className="w-full">
                             <div className="mx-auto w-full rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:w-full lg:items-center lg:justify-between lg:gap-3">
@@ -251,7 +232,7 @@ export default function Welcome({
                                         type="number"
                                         value={selectedCapacity ?? ''}
                                     />
-                                     <InputField
+                                    <InputField
                                         icon={
                                             <SlCalender className="h-4 w-4 text-blue-500" />
                                         }
@@ -262,7 +243,6 @@ export default function Welcome({
                                         type="date"
                                         value={selectedDate ?? ''}
                                     />
-                                    
 
                                     <div className="hidden lg:block lg:flex-1" />
 
@@ -276,221 +256,7 @@ export default function Welcome({
                             </div>
                         </form>
                         <div className="bg-white">
-                            <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="font-poppins text-2xl font-bold tracking-tight text-gray-900">
-                                        Paling Diminati
-                                    </h2>
-
-                                    <a
-                                        href="#"
-                                        className="text-sm font-semibold text-gray-700 hover:text-gray-900"
-                                    >
-                                        See More
-                                    </a>
-                                </div>
-
-                                <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                                    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                        <div className="p-3">
-                                            <div className="overflow-hidden rounded-lg bg-gray-100">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=1200&q=80"
-                                                    alt="Aula Lama"
-                                                    className="h-44 w-full object-cover"
-                                                />
-                                            </div>
-
-                                            <div className="mt-3">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-gray-900">
-                                                        Aula Lama
-                                                    </p>
-                                                    <p className="text-xs font-semibold text-green-600">
-                                                        Tersedia
-                                                    </p>
-                                                </div>
-
-                                                <p className="mt-1 text-xs text-gray-500">
-                                                    Gedung Depati Barin
-                                                </p>
-
-                                                <div className="mt-4 flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-blue-600">
-                                                        Rp 2.200.000/hari
-                                                    </p>
-
-                                                    <button
-                                                        type="button"
-                                                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:border-blue-200 hover:text-blue-600"
-                                                        aria-label="Favorit"
-                                                    >
-                                                        <svg
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                            className="h-5 w-5"
-                                                        >
-                                                            <path d="M20.8 4.6c-1.6-1.7-4.3-1.7-5.9 0L12 7.5 9.1 4.6c-1.6-1.7-4.3-1.7-5.9 0-1.8 1.9-1.8 4.9 0 6.8l2.9 3 5.9 6.1 5.9-6.1 2.9-3c1.8-1.9 1.8-4.9 0-6.8z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Card 2 */}
-                                    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                        <div className="p-3">
-                                            <div className="overflow-hidden rounded-lg bg-gray-100">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1560448204-603b3fc33ddc?auto=format&fit=crop&w=1200&q=80"
-                                                    alt="Aula Baru"
-                                                    className="h-44 w-full object-cover"
-                                                />
-                                            </div>
-
-                                            <div className="mt-3">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-gray-900">
-                                                        Aula Baru
-                                                    </p>
-                                                    <p className="text-xs font-semibold text-green-600">
-                                                        Tersedia
-                                                    </p>
-                                                </div>
-
-                                                <p className="mt-1 text-xs text-gray-500">
-                                                    Gedung Depati Barin
-                                                </p>
-
-                                                <div className="mt-4 flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-blue-600">
-                                                        Rp 2.200.000/hari
-                                                    </p>
-
-                                                    <button
-                                                        type="button"
-                                                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:border-blue-200 hover:text-blue-600"
-                                                        aria-label="Favorit"
-                                                    >
-                                                        <svg
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                            className="h-5 w-5"
-                                                        >
-                                                            <path d="M20.8 4.6c-1.6-1.7-4.3-1.7-5.9 0L12 7.5 9.1 4.6c-1.6-1.7-4.3-1.7-5.9 0-1.8 1.9-1.8 4.9 0 6.8l2.9 3 5.9 6.1 5.9-6.1 2.9-3c1.8-1.9 1.8-4.9 0-6.8z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Card 3 */}
-                                    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                        <div className="p-3">
-                                            <div className="overflow-hidden rounded-lg bg-gray-100">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80"
-                                                    alt="Asrama"
-                                                    className="h-44 w-full object-cover"
-                                                />
-                                            </div>
-
-                                            <div className="mt-3">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-gray-900">
-                                                        Asrama
-                                                    </p>
-                                                    <p className="text-xs font-semibold text-green-600">
-                                                        Tersedia
-                                                    </p>
-                                                </div>
-
-                                                <p className="mt-1 text-xs text-gray-500">
-                                                    Asrama Pulau Lepar
-                                                </p>
-
-                                                <div className="mt-4 flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-blue-600">
-                                                        Rp 250.000/malam
-                                                    </p>
-
-                                                    <button
-                                                        type="button"
-                                                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:border-blue-200 hover:text-blue-600"
-                                                        aria-label="Favorit"
-                                                    >
-                                                        <svg
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                            className="h-5 w-5"
-                                                        >
-                                                            <path d="M20.8 4.6c-1.6-1.7-4.3-1.7-5.9 0L12 7.5 9.1 4.6c-1.6-1.7-4.3-1.7-5.9 0-1.8 1.9-1.8 4.9 0 6.8l2.9 3 5.9 6.1 5.9-6.1 2.9-3c1.8-1.9 1.8-4.9 0-6.8z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Card 4 */}
-                                    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                        <div className="p-3">
-                                            <div className="overflow-hidden rounded-lg bg-gray-100">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80"
-                                                    alt="Ruang Kelas"
-                                                    className="h-44 w-full object-cover"
-                                                />
-                                            </div>
-
-                                            <div className="mt-3">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-gray-900">
-                                                        Ruang Kelas
-                                                    </p>
-                                                    <p className="text-xs font-semibold text-green-600">
-                                                        Tersedia
-                                                    </p>
-                                                </div>
-
-                                                <p className="mt-1 text-xs text-gray-500">
-                                                    Ruang Kelas 1
-                                                </p>
-
-                                                <div className="mt-4 flex items-center justify-between">
-                                                    <p className="text-sm font-semibold text-blue-600">
-                                                        Rp 220.000/hari
-                                                    </p>
-
-                                                    <button
-                                                        type="button"
-                                                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:border-blue-200 hover:text-blue-600"
-                                                        aria-label="Favorit"
-                                                    >
-                                                        <svg
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                            className="h-5 w-5"
-                                                        >
-                                                            <path d="M20.8 4.6c-1.6-1.7-4.3-1.7-5.9 0L12 7.5 9.1 4.6c-1.6-1.7-4.3-1.7-5.9 0-1.8 1.9-1.8 4.9 0 6.8l2.9 3 5.9 6.1 5.9-6.1 2.9-3c1.8-1.9 1.8-4.9 0-6.8z" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <Popular rooms={rooms} />
                         </div>
                     </main>
                 </div>

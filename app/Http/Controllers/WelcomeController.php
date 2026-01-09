@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Building;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,8 +15,11 @@ class WelcomeController extends Controller
     public function index()
     {
         $buildings = Building::all();
+        $rooms = Room::with('building')->get();
+
         return Inertia::render('welcome', [
             'buildings' => $buildings,
+            'rooms' => $rooms,
         ]);
     }
 
