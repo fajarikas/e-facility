@@ -7,6 +7,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { FaRupiahSign } from 'react-icons/fa6';
 import { TbBuildingSkyscraper } from 'react-icons/tb';
+import { BsPeopleFill } from "react-icons/bs";
+import { SlCalender } from "react-icons/sl";
 
 export default function Welcome({
     canRegister = true,
@@ -26,6 +28,7 @@ export default function Welcome({
     );
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     console.log('🚀 ~ Welcome ~ selectedDate:', selectedDate);
+    console.log(selectedCapacity)
 
     const filteredBuildings = useMemo(() => {
         const query = buildingQuery.trim().toLowerCase();
@@ -236,6 +239,30 @@ export default function Welcome({
                                         type="text"
                                         value={selectedPrice ?? ''}
                                     />
+
+                                    <InputField
+                                        icon={
+                                            <BsPeopleFill className="h-4 w-4 text-blue-500" />
+                                        }
+                                        onChange={(e) =>
+                                            setSelectedCapacity(e.target.value)
+                                        }
+                                        placeholder="Kapasitas"
+                                        type="number"
+                                        value={selectedCapacity ?? ''}
+                                    />
+                                     <InputField
+                                        icon={
+                                            <SlCalender className="h-4 w-4 text-blue-500" />
+                                        }
+                                        onChange={(e) =>
+                                            setSelectedDate(e.target.value)
+                                        }
+                                        placeholder="Tanggal"
+                                        type="date"
+                                        value={selectedDate ?? ''}
+                                    />
+                                    
 
                                     <div className="hidden lg:block lg:flex-1" />
 
