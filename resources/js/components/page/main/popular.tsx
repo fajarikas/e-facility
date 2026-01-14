@@ -21,7 +21,7 @@ const Popular = ({ rooms }: Props) => {
 
     return (
         <div>
-            <div className="mx-auto w-full px-4 py-12">
+            <div className="mx-auto w-full max-w-[1280px] px-4 py-12">
                 <div className="flex items-center justify-between">
                     <h2 className="font-poppins text-2xl font-bold tracking-tight text-gray-900">
                         Paling Diminati

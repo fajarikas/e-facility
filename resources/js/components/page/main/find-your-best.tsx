@@ -2,7 +2,7 @@ type Props = {};
 
 const FindYourBest = (props: Props) => {
     return (
-        <div className="lg:gap-6` flex flex-col gap-4">
+        <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 lg:gap-6">
             <h1 className="text-center text-[16px] font-bold lg:text-3xl dark:text-[#EDEDEC]">
                 Cari Fasilitas Terbaik Pilihamnu
             </h1>

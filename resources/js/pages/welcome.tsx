@@ -1,6 +1,7 @@
 import InputField from '@/components/custom/input';
 import FindYourBest from '@/components/page/main/find-your-best';
 import Popular from '@/components/page/main/popular';
+import Reason from '@/components/page/main/reason';
 import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
 import { Building } from '@/types/buildings';
@@ -52,8 +53,8 @@ export default function Welcome({
                 />
             </Head>
             <div className="min-h-screen w-full bg-[#FDFDFC] font-poppins text-[#1b1b18] dark:bg-[#0a0a0a]">
-                <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-                    <header className="mb-6 text-sm lg:mb-12 lg:text-base">
+                <div className="">
+                    <header className="mx-auto mb-6 w-full max-w-[1280px] text-sm lg:mb-12 lg:text-base">
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex shrink-0 items-center gap-2">
                                 <img
@@ -97,10 +98,9 @@ export default function Welcome({
                         </div>
                     </header>
 
-                    {/* MAIN */}
                     <main className="flex flex-col gap-4 lg:gap-6">
                         <FindYourBest />
-                        <form className="w-full">
+                        <form className="mx-auto w-full max-w-[1280px]">
                             <div className="mx-auto w-full rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:w-full lg:items-center lg:justify-between lg:gap-3">
                                     <Combobox
@@ -255,8 +255,9 @@ export default function Welcome({
                                 </div>
                             </div>
                         </form>
-                        <div className="bg-white">
+                        <div className="">
                             <Popular rooms={rooms} />
+                            <Reason />
                         </div>
                     </main>
                 </div>
