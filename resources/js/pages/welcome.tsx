@@ -2,6 +2,8 @@ import InputField from '@/components/custom/input';
 import FindYourBest from '@/components/page/main/find-your-best';
 import Popular from '@/components/page/main/popular';
 import Reason from '@/components/page/main/reason';
+import CallToAction from '@/components/page/main/calltoaction';
+import Footer from '@/components/page/footer/footer';
 import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
 import { Building } from '@/types/buildings';
@@ -259,6 +261,12 @@ export default function Welcome({
                             <Popular rooms={rooms} />
                             <Reason />
                         </div>
+                        <div className="">
+                            <CallToAction/>
+                        </div>
+                       <div className="div">
+                        <Footer/>
+                       </div>
                     </main>
                 </div>
             </div>
