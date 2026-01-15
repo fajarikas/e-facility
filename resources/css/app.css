@@ -175,4 +175,11 @@
         -2px 2px 6px 0 rgba(0, 0, 0, 0.53);
 }
 
-
+.bg-footer {
+    background: linear-gradient(
+        180deg,
+        #018fd3 0%,
+        #2e93f9 50.97%,
+        #018fd3 100%
+    );
+}
