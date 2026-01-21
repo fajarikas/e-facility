@@ -32,4 +32,14 @@ class Room extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(UserRoomLike::class);
+    }
 }

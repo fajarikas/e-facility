@@ -114,10 +114,25 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                                             Pemesan
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+                                            No HP
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+                                            Alamat
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
                                             Ruangan
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
                                             Bangunan
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+                                            VA
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+                                            Metode
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
+                                            Kontak
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
                                             Check In
@@ -147,7 +162,13 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                                                         <IoMdEye size={20} className="text-gray-600" />
                                                     </td>
                                                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                                                        {detail?.user?.name || '-'}
+                                                        {item.customer_name || detail?.user?.name || '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                                        {item.customer_phone || '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                                        {item.customer_address || '-'}
                                                     </td>
                                                     <td className="px-6 py-4 text-sm text-gray-700">
                                                         {item.room?.name}
@@ -156,17 +177,28 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                                                         {item.room?.building?.name}
                                                     </td>
                                                     <td className="px-6 py-4 text-sm text-gray-700">
+                                                        {item.payment_method?.account_number ||
+                                                            item.data_master?.va_number ||
+                                                            '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                                        {item.payment_method
+                                                            ? `${item.payment_method.type === 'va' ? 'VA' : 'Transfer'} - ${item.payment_method.bank_name}`
+                                                            : '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">
+                                                        {item.data_master
+                                                            ? `${item.data_master.name} (${item.data_master.contact})`
+                                                            : '-'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">
                                                         {new Date(item.check_in_date).toLocaleDateString('id-ID')}
                                                     </td>
                                                     <td className="px-6 py-4 text-sm text-gray-700">
                                                         {new Date(item.check_out_date).toLocaleDateString('id-ID')}
                                                     </td>
                                                     <td className="px-6 py-4 text-right text-sm text-gray-700">
-                                                        {new Intl.NumberFormat('id-ID', {
-                                                            style: 'currency',
-                                                            currency: 'IDR',
-                                                            minimumFractionDigits: 0,
-                                                        }).format(Number(item.total_harga) || 0)}
+                                                        {`Rp${new Intl.NumberFormat('id-ID').format(Number(item.total_harga) || 0)}`}
                                                     </td>
                                                     <td className="px-6 py-4 text-sm">
                                                         <span
@@ -210,7 +242,7 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                                     ) : (
                                         <tr>
                                             <td
-                                                colSpan={9}
+                                                colSpan={15}
                                                 className="px-6 py-10 text-center text-base text-gray-500"
                                             >
                                                 Belum ada transaksi.

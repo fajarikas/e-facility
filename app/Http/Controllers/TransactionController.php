@@ -17,7 +17,7 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transactions = Transaction::with(['room.building', 'details.user'])
+        $transactions = Transaction::with(['room.building', 'details.user', 'dataMaster', 'paymentMethod'])
             ->latest()
             ->paginate(10);
         $rooms = Room::with('building')->orderBy('name')->get();

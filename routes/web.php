@@ -1,9 +1,15 @@
 <?php
 
 use App\Http\Controllers\BuildingController;
+use App\Http\Controllers\FacilityController;
+use App\Http\Controllers\FacilityLikeController;
+use App\Http\Controllers\FacilityOrderController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserTransactionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\DataMasterController as AdminDataMasterController;
+use App\Http\Controllers\Admin\PaymentMethodController as AdminPaymentMethodController;
 use App\Http\Controllers\WelcomeController;
 use App\Models\Building;
 use App\Models\Room;
@@ -18,6 +24,17 @@ use Laravel\Fortify\Features;
 //     ]);
 // })->name('home');
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
+
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('facilities', [FacilityController::class, 'index'])->name('facilities.index');
+    Route::get('facilities/bookmarks', [FacilityController::class, 'bookmarks'])->name('facilities.bookmarks');
+    Route::get('facilities/{room}', [FacilityController::class, 'show'])->name('facilities.show');
+    Route::post('facilities/{room}/like', [FacilityLikeController::class, 'toggle'])->name('facilities.like');
+    Route::post('facilities/{room}/order', [FacilityOrderController::class, 'store'])->name('facilities.order');
+
+    Route::get('my-transactions', [UserTransactionController::class, 'index'])->name('user.transactions.index');
+    Route::get('my-transactions/{transaction}', [UserTransactionController::class, 'show'])->name('user.transactions.show');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin,superadmin'])->group(function () {
@@ -56,6 +73,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('admin/users', [AdminUserController::class, 'index'])->name('admin.users');
         Route::put('admin/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('admin.users.role');
+
+        Route::get('admin/data-masters', [AdminDataMasterController::class, 'index'])->name('admin.data-masters');
+        Route::post('admin/data-masters', [AdminDataMasterController::class, 'store'])->name('admin.data-masters.store');
+        Route::put('admin/data-masters/{dataMaster}', [AdminDataMasterController::class, 'update'])->name('admin.data-masters.update');
+        Route::delete('admin/data-masters/{dataMaster}', [AdminDataMasterController::class, 'destroy'])->name('admin.data-masters.destroy');
+
+        Route::get('admin/payment-methods', [AdminPaymentMethodController::class, 'index'])->name('admin.payment-methods');
+        Route::post('admin/payment-methods', [AdminPaymentMethodController::class, 'store'])->name('admin.payment-methods.store');
+        Route::put('admin/payment-methods/{paymentMethod}', [AdminPaymentMethodController::class, 'update'])->name('admin.payment-methods.update');
+        Route::delete('admin/payment-methods/{paymentMethod}', [AdminPaymentMethodController::class, 'destroy'])->name('admin.payment-methods.destroy');
     });
 });
 

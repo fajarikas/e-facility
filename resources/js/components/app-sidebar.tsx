@@ -12,7 +12,17 @@ import {
 import { buildings, dashboard, logout, rooms } from '@/routes';
 import { type NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BedDouble, Building, LayoutGrid, LogOut, ReceiptText, Users } from 'lucide-react';
+import {
+    BedDouble,
+    Building,
+    Building2,
+    CreditCard,
+    Heart,
+    LayoutGrid,
+    LogOut,
+    ReceiptText,
+    Users,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -41,6 +51,34 @@ const mainNavItems: NavItem[] = [
         href: '/admin/users',
         icon: Users,
     },
+    {
+        title: 'Data Master',
+        href: '/admin/data-masters',
+        icon: CreditCard,
+    },
+    {
+        title: 'Metode Pembayaran',
+        href: '/admin/payment-methods',
+        icon: CreditCard,
+    },
+];
+
+const userNavItems: NavItem[] = [
+    {
+        title: 'Fasilitas',
+        href: '/facilities',
+        icon: Building2,
+    },
+    {
+        title: 'Transaksi',
+        href: '/my-transactions',
+        icon: ReceiptText,
+    },
+    {
+        title: 'Bookmark',
+        href: '/facilities/bookmarks',
+        icon: Heart,
+    },
 ];
 
 // footer nav left intentionally unused — remove to satisfy linter
@@ -51,7 +89,8 @@ export function AppSidebar() {
         auth?.user?.role as string,
     );
 
-    const navItems = canAccessBackoffice ? mainNavItems : [];
+    const navItems = canAccessBackoffice ? mainNavItems : userNavItems;
+    const homeHref = canAccessBackoffice ? dashboard() : '/facilities';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -59,7 +98,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={homeHref} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

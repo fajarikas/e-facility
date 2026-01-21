@@ -7,7 +7,13 @@ test('guests are redirected to the login page', function () {
 });
 
 test('authenticated users can visit the dashboard', function () {
-    $this->actingAs($user = User::factory()->create());
+    $this->actingAs($user = User::factory()->create(['role' => 'admin']));
 
     $this->get(route('dashboard'))->assertOk();
+});
+
+test('role user can not visit the dashboard', function () {
+    $this->actingAs($user = User::factory()->create(['role' => 'user']));
+
+    $this->get(route('dashboard'))->assertForbidden();
 });

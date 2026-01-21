@@ -6,6 +6,7 @@ use Database\Factories\BuildingFactory;
 use Database\Factories\RoomFactory;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\DataMasterSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,6 +19,7 @@ class DatabaseSeeder extends Seeder
         BuildingFactory::new()->count(30)->create();
         RoomFactory::new()->count(100)->create();
         $this->call(AdminUserSeeder::class);
+        $this->call(DataMasterSeeder::class);
         // User::firstOrCreate(
         //     ['email' => 'test@example.com'],
         //     [

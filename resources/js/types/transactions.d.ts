@@ -1,5 +1,6 @@
 import { User } from './index';
 import { RoomData } from './rooms';
+import { DataMaster, PaymentMethod } from './data-master';
 
 export interface TransactionDetailData {
     id: number;
@@ -11,10 +12,15 @@ export interface TransactionData {
     id: number;
     check_in_date: string;
     check_out_date: string;
+    customer_name?: string | null;
+    customer_phone?: string | null;
+    customer_address?: string | null;
     total_harga: number;
     is_booked: 'Yes' | 'No';
     room: RoomData;
     details: TransactionDetailData[];
+    data_master?: DataMaster | null;
+    payment_method?: PaymentMethod | null;
 }
 
 export interface TransactionPaginationLink {

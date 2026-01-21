@@ -72,10 +72,16 @@ export default function Welcome({
                             <nav className="flex items-center gap-2 sm:gap-4">
                                 {auth.user ? (
                                     <Link
-                                        href={dashboard()}
+                                        href={
+                                            auth.user.role === 'user'
+                                                ? '/facilities'
+                                                : dashboard()
+                                        }
                                         className="rounded-full border border-[#19140035] px-3 py-1 text-xs whitespace-nowrap hover:border-[#1915014a] sm:px-5 sm:py-1.5 sm:text-sm dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                                     >
-                                        Dashboard
+                                        {auth.user.role === 'user'
+                                            ? 'Fasilitas'
+                                            : 'Dashboard'}
                                     </Link>
                                 ) : (
                                     <>
