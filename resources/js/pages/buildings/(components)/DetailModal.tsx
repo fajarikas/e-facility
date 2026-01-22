@@ -28,11 +28,6 @@ const DetailModal = ({ building, isOpen, onClose, title }: Props) => {
                     <p className="text-gray-900">{building.name}</p>
                 </div>
 
-                <div className="flex justify-between border-b pb-2">
-                    <p className="font-semibold text-gray-600">Jenis BMN</p>
-                    <p className="text-gray-900">{building.bmn_type}</p>
-                </div>
-
                 <div>
                     <p className="mb-1 font-semibold text-gray-600">Alamat</p>
                     <p className="rounded border bg-gray-50 p-2 whitespace-pre-wrap text-gray-900">

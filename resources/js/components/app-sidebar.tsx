@@ -9,7 +9,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { buildings, dashboard, logout, rooms } from '@/routes';
+import { buildings, dashboard, rooms } from '@/routes';
 import { type NavItem, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
@@ -19,7 +19,6 @@ import {
     CreditCard,
     Heart,
     LayoutGrid,
-    LogOut,
     ReceiptText,
     Users,
 } from 'lucide-react';
@@ -115,12 +114,12 @@ export function AppSidebar() {
                 <NavUser />
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                        {/* <SidebarMenuButton asChild>
                             <Link href={logout()} as="button">
                                 <LogOut className="mr-2 size-4" />
                                 Logout
                             </Link>
-                        </SidebarMenuButton>
+                        </SidebarMenuButton> */}
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>

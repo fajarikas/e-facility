@@ -6,6 +6,7 @@ use App\Models\Room;
 use App\Models\UserRoomLike;
 use App\Models\DataMaster;
 use App\Models\PaymentMethod;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,6 +14,8 @@ class FacilityController extends Controller
 {
     public function index(Request $request)
     {
+        Transaction::expirePending();
+
         $validated = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
             'date' => ['nullable', 'date_format:Y-m-d'],
@@ -46,21 +49,41 @@ class FacilityController extends Controller
             });
         }
 
-        if ($date) {
-            $query->whereDoesntHave('transactions', function ($transactionQuery) use ($date) {
-                $transactionQuery
-                    ->where('is_booked', 'Yes')
-                    ->whereDate('check_in_date', '<=', $date)
-                    ->whereDate('check_out_date', '>=', $date);
-            });
-        }
+        $dateToCheck = $date ?: now()->toDateString();
 
-        $rooms = $query->latest()->paginate(12)->withQueryString();
+        $rooms = $query
+            ->with([
+                'transactions' => function ($transactionQuery) use ($dateToCheck) {
+                    $transactionQuery
+                        ->whereDate('check_in_date', '<=', $dateToCheck)
+                        ->whereDate('check_out_date', '>=', $dateToCheck)
+                        ->where(function ($q) {
+                            $q->where('status', 'booked')
+                                ->orWhere(function ($q2) {
+                                    $q2->where('status', 'pending_payment')->where('expires_at', '>', now());
+                                });
+                        })
+                        ->latest();
+                },
+            ])
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
 
         $likedRoomIds = UserRoomLike::query()
             ->where('user_id', $request->user()->id)
             ->pluck('room_id')
             ->values();
+
+        $availabilityByRoomId = [];
+        foreach ($rooms->items() as $room) {
+            $status = 'available';
+            $tx = $room->transactions->first();
+            if ($tx) {
+                $status = $tx->status === 'booked' ? 'booked' : 'pending_payment';
+            }
+            $availabilityByRoomId[$room->id] = $status;
+        }
 
         return Inertia::render('facilities/index', [
             'data' => $rooms,
@@ -69,6 +92,8 @@ class FacilityController extends Controller
                 'date' => $date ?? '',
             ],
             'likedRoomIds' => $likedRoomIds,
+            'availabilityDate' => $date,
+            'availabilityByRoomId' => $availabilityByRoomId,
         ]);
     }
 

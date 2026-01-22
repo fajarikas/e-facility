@@ -4,9 +4,6 @@ export interface RoomData {
     id: number;
     name: string;
     price: number;
-    capacity_count: number;
-    toilet_count: number;
-    area: number;
     description: string;
     building_id: number;
     building: Building;

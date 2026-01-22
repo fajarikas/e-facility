@@ -15,6 +15,8 @@ export interface TransactionData {
     customer_name?: string | null;
     customer_phone?: string | null;
     customer_address?: string | null;
+    status?: 'pending_payment' | 'booked' | 'cancelled' | 'expired';
+    expires_at?: string | null;
     total_harga: number;
     is_booked: 'Yes' | 'No';
     room: RoomData;

@@ -152,25 +152,31 @@ export default function Login({ status, canRegister }: LoginProps) {
                                 </div>
                                 <div className="mt-5 flex items-center space-x-4">
                                     <div className="flex flex-col items-center space-y-2">
-                                        <div className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-[#F5F5F5]">
+                                        <a
+                                            href="/auth/facebook/redirect"
+                                            className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-[#F5F5F5] hover:bg-[#ECECEC]"
+                                        >
                                             <img
                                                 className=""
                                                 src="/images/icons/facebook.svg"
                                                 width={30}
                                                 height={30}
                                             />
-                                        </div>
+                                        </a>
                                         <p className="text-sm">Facebook</p>
                                     </div>
                                     <div className="flex flex-col items-center space-y-2">
-                                        <div className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-[#F5F5F5]">
+                                        <a
+                                            href="/auth/google/redirect"
+                                            className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-[#F5F5F5] hover:bg-[#ECECEC]"
+                                        >
                                             <img
                                                 className=""
                                                 src="/images/icons/google.svg"
                                                 width={30}
                                                 height={30}
                                             />
-                                        </div>
+                                        </a>
                                         <p className="text-sm">Gmail</p>
                                     </div>
                                 </div>

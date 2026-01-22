@@ -6,6 +6,7 @@ import { rooms } from '@/routes';
 import { BreadcrumbItem } from '@/types';
 import { Building } from '@/types/buildings';
 import { PaginatedRoomData, RoomData } from '@/types/rooms';
+import { htmlToText } from '@/lib/rich-text';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { IoMdEye, IoMdTrash } from 'react-icons/io';
@@ -40,6 +41,8 @@ const index = ({ data, buildings }: Props) => {
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
 
     const openConfirm = (id: number | string) => {
         setPendingDeleteId(Number(id));
@@ -94,9 +97,17 @@ const index = ({ data, buildings }: Props) => {
                     <h1 className="text-2xl font-bold text-gray-800">
                         Daftar Ruangan
                     </h1>
-                    <Button onClick={() => setIsCreateModalOpen(true)}>
-                        Tambah Ruangan
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsImportOpen(true)}
+                        >
+                            Upload Excel
+                        </Button>
+                        <Button onClick={() => setIsCreateModalOpen(true)}>
+                            Tambah Ruangan
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-lg">
@@ -113,15 +124,6 @@ const index = ({ data, buildings }: Props) => {
                                             Harga/Malam
                                         </th>
                                         <th className="px-6 py-3 text-right text-xs font-semibold tracking-wider text-gray-600 uppercase">
-                                            Kapasitas
-                                        </th>
-                                        <th className="px-6 py-3 text-right text-xs font-semibold tracking-wider text-gray-600 uppercase">
-                                            Toilet Count
-                                        </th>
-                                        <th className="px-6 py-3 text-right text-xs font-semibold tracking-wider text-gray-600 uppercase">
-                                            Luas (m²)
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
                                             Deskripsi
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
@@ -129,9 +131,6 @@ const index = ({ data, buildings }: Props) => {
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
                                             Alamat Bangunan
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">
-                                            Jenis BMN
                                         </th>
                                         <th className="rounded-tr-xl px-6 py-3"></th>
                                     </tr>
@@ -172,25 +171,18 @@ const index = ({ data, buildings }: Props) => {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-700">
-                                                    {item.capacity_count}
-                                                </td>
-                                                <td className="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-700">
-                                                    {item.toilet_count}
-                                                </td>
-                                                <td className="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-700">
-                                                    {item.area} m²
-                                                </td>
-                                                <td className="line-clamp-3 max-w-xs overflow-hidden px-6 py-4 text-sm text-ellipsis text-gray-700">
-                                                    {item.description}
+                                                    <span className="line-clamp-2 block max-w-xs">
+                                                        {htmlToText(
+                                                            item.description ||
+                                                                '',
+                                                        )}
+                                                    </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-medium text-gray-800">
                                                     {item.building.name}
                                                 </td>
                                                 <td className="max-w-sm overflow-hidden px-6 py-4 text-sm text-ellipsis text-gray-700">
                                                     {item.building.address}
-                                                </td>
-                                                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
-                                                    {item.building.bmn_type}
                                                 </td>
 
                                                 <td
@@ -301,6 +293,80 @@ const index = ({ data, buildings }: Props) => {
                     >
                         Hapus
                     </Button>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                title="Upload Excel Ruangan"
+            >
+                <div className="space-y-3">
+                    <div className="text-sm text-gray-700">
+                        Header wajib: <code>name</code>, <code>price</code>,{' '}
+                        <code>description</code>,{' '}
+                        <code>building_id</code>. Format: <code>.xlsx</code> atau{' '}
+                        <code>.csv</code>.
+                    </div>
+                    <input
+                        type="file"
+                        accept=".xlsx,.csv"
+                        onChange={(e) =>
+                            setImportFile(e.target.files?.[0] ?? null)
+                        }
+                    />
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setIsImportOpen(false)}
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (!importFile) return;
+                                router.post(
+                                    '/rooms/import',
+                                    { file: importFile },
+                                    {
+                                        forceFormData: true,
+                                        onSuccess: () => {
+                                            setIsImportOpen(false);
+                                            setImportFile(null);
+                                            Toastify({
+                                                text: 'Import ruangan selesai',
+                                                duration: 3000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#1A5319',
+                                                },
+                                            }).showToast();
+                                        },
+                                        onError: (errors) => {
+                                            const message =
+                                                (errors as Record<string, string>)
+                                                    ?.file || 'Gagal import ruangan';
+                                            Toastify({
+                                                text: message,
+                                                duration: 4000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#B91C1C',
+                                                },
+                                            }).showToast();
+                                        },
+                                    },
+                                );
+                            }}
+                            disabled={!importFile}
+                        >
+                            Upload
+                        </Button>
+                    </div>
                 </div>
             </Modal>
         </AppLayout>

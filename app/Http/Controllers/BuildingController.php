@@ -42,7 +42,6 @@ class BuildingController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'bmn_type' => 'required|string|max:255',
             'address' => 'required|max:255'
         ]);
 
@@ -83,7 +82,6 @@ class BuildingController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'bmn_type' => 'required|string|max:255',
             'address' => 'required|string|max:255'
         ]);
 

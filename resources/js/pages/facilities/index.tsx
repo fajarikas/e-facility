@@ -22,9 +22,16 @@ type Props = {
         date: string;
     };
     likedRoomIds: number[];
+    availabilityDate: string | null;
+    availabilityByRoomId: Record<number, 'available' | 'pending_payment' | 'booked'>;
 };
 
-export default function FacilitiesIndex({ data, filters, likedRoomIds }: Props) {
+export default function FacilitiesIndex({
+    data,
+    filters,
+    likedRoomIds,
+    availabilityByRoomId,
+}: Props) {
     const [q, setQ] = useState(filters.q ?? '');
     const [date, setDate] = useState(filters.date ?? '');
 
@@ -111,6 +118,7 @@ export default function FacilitiesIndex({ data, filters, likedRoomIds }: Props) 
                                 key={room.id}
                                 room={room}
                                 isLiked={likedSet.has(room.id)}
+                                availability={availabilityByRoomId[room.id] ?? 'available'}
                             />
                         ))
                     ) : (
@@ -130,4 +138,3 @@ export default function FacilitiesIndex({ data, filters, likedRoomIds }: Props) 
         </AppLayout>
     );
 }
-

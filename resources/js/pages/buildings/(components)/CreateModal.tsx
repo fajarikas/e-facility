@@ -15,7 +15,6 @@ type Props = {
 const CreateModal = ({ isOpen, onClose }: Props) => {
     const { data, setData, post, processing, reset } = useForm({
         name: '',
-        bmn_type: '',
         address: '',
     });
 
@@ -58,27 +57,6 @@ const CreateModal = ({ isOpen, onClose }: Props) => {
                         onChange={(e) => setData('name', e.target.value)}
                         className="w-full rounded-lg border border-[#454545]/60 px-5 py-2 focus:outline-[#454545]/90"
                     />
-                </div>
-                <div className="flex flex-col space-y-1">
-                    <label htmlFor="name">Jenis Bangunan</label>
-                    <select
-                        value={data.bmn_type}
-                        onChange={(e) => setData('bmn_type', e.target.value)}
-                        className="w-full rounded-lg border border-[#454545]/60 px-5 py-2 text-[#454545] focus:outline-[#454545]/90"
-                    >
-                        <option selected value="">
-                            Pilih Jenis BMN
-                        </option>
-                        <option className="text-[#454545]" value="Type A">
-                            Type A
-                        </option>
-                        <option className="text-[#454545]" value="Type B">
-                            Type B
-                        </option>
-                        <option className="text-[#454545]" value="Type C">
-                            Type C
-                        </option>
-                    </select>
                 </div>
                 <div className="flex flex-col space-y-1">
                     <label htmlFor="name">Alamat Bangunan</label>

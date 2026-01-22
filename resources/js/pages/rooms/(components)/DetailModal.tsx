@@ -1,4 +1,5 @@
 import Modal from '@/components/modals';
+import { RichText } from '@/components/ui/rich-text';
 import { RoomData } from '@/types/rooms';
 
 type Props = {
@@ -45,29 +46,13 @@ const DetailRoomModal = ({ room, isOpen, onClose }: Props) => {
                             }).format(Number(room.price) || 0)}
                         </p>
                     </div>
-                    <div className="rounded border bg-gray-50 p-3">
-                        <p className="text-xs text-gray-500">Luas</p>
-                        <p className="text-sm font-semibold">{room.area} m2</p>
-                    </div>
-                    <div className="rounded border bg-gray-50 p-3">
-                        <p className="text-xs text-gray-500">Kapasitas</p>
-                        <p className="text-sm font-semibold">
-                            {room.capacity_count}
-                        </p>
-                    </div>
-                    <div className="rounded border bg-gray-50 p-3">
-                        <p className="text-xs text-gray-500">Jumlah Toilet</p>
-                        <p className="text-sm font-semibold">
-                            {room.toilet_count}
-                        </p>
-                    </div>
                 </div>
 
                 <div>
                     <p className="mb-1 font-semibold text-gray-600">Deskripsi</p>
-                    <p className="rounded border bg-gray-50 p-2 whitespace-pre-wrap text-gray-900">
-                        {room.description}
-                    </p>
+                    <div className="rounded border bg-gray-50 p-3">
+                        <RichText html={room.description || ''} />
+                    </div>
                 </div>
 
                 <div>

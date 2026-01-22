@@ -1,5 +1,6 @@
 import Modal from '@/components/modals';
 import { Button } from '@/components/ui/button';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Building } from '@/types/buildings';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useMemo, useRef, useState } from 'react';
@@ -21,9 +22,6 @@ const CreateRoomModal = ({ isOpen, onClose, buildings }: Props) => {
     const { data, setData, post, processing, reset, errors } = useForm({
         name: '',
         price: 0,
-        capacity_count: 0,
-        toilet_count: 0,
-        area: 0,
         description: '',
         building_id: 0,
         images: [] as File[],
@@ -204,78 +202,6 @@ const CreateRoomModal = ({ isOpen, onClose, buildings }: Props) => {
                     </div>
                 </div>
 
-                {/* 2. Baris Kedua (Kapasitas, Toilet, Luas) */}
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="flex flex-col space-y-1">
-                        <label
-                            htmlFor="capacity_count"
-                            className="text-sm font-medium"
-                        >
-                            Kapasitas
-                        </label>
-                        <input
-                            id="capacity_count"
-                            type="number"
-                            value={data.capacity_count}
-                            onChange={(e) =>
-                                setData(
-                                    'capacity_count',
-                                    Number(e.target.value),
-                                )
-                            }
-                            className="rounded-lg border border-gray-400 px-3 py-2 focus:outline-blue-500"
-                        />
-                        {errors.capacity_count && (
-                            <p className="text-xs text-red-500">
-                                {errors.capacity_count}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="flex flex-col space-y-1">
-                        <label
-                            htmlFor="toilet_count"
-                            className="text-sm font-medium"
-                        >
-                            Jumlah Toilet
-                        </label>
-                        <input
-                            id="toilet_count"
-                            type="number"
-                            value={data.toilet_count}
-                            onChange={(e) =>
-                                setData('toilet_count', Number(e.target.value))
-                            }
-                            className="rounded-lg border border-gray-400 px-3 py-2 focus:outline-blue-500"
-                        />
-                        {errors.toilet_count && (
-                            <p className="text-xs text-red-500">
-                                {errors.toilet_count}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="flex flex-col space-y-1">
-                        <label htmlFor="area" className="text-sm font-medium">
-                            Luas (m²)
-                        </label>
-                        <input
-                            id="area"
-                            type="number"
-                            value={data.area}
-                            onChange={(e) =>
-                                setData('area', Number(e.target.value))
-                            }
-                            className="rounded-lg border border-gray-400 px-3 py-2 focus:outline-blue-500"
-                        />
-                        {errors.area && (
-                            <p className="text-xs text-red-500">
-                                {errors.area}
-                            </p>
-                        )}
-                    </div>
-                </div>
-
                 {/* 3. Baris Ketiga (Deskripsi) */}
                 <div className="flex flex-col space-y-1">
                     <label
@@ -284,12 +210,10 @@ const CreateRoomModal = ({ isOpen, onClose, buildings }: Props) => {
                     >
                         Deskripsi
                     </label>
-                    <textarea
-                        id="description"
-                        rows={3}
+                    <RichTextEditor
                         value={data.description}
-                        onChange={(e) => setData('description', e.target.value)}
-                        className="rounded-lg border border-gray-400 px-3 py-2 focus:outline-blue-500"
+                        onChange={(value) => setData('description', value)}
+                        placeholder="Tulis deskripsi fasilitas..."
                     />
                     {errors.description && (
                         <p className="text-xs text-red-500">

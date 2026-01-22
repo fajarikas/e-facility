@@ -39,9 +39,6 @@ class RoomFactory extends Factory
         return [
             'name' => $this->faker->country(),
             'price' => $this->faker->numberBetween(100000, 2000000),
-            'capacity_count' => $this->faker->numberBetween(1, 20),
-            'toilet_count' => $this->faker->numberBetween(1, 3),
-            'area' => $this->faker->numberBetween(50, 100),
             'description' => $this->faker->sentence(30, true),
             'building_id' => Building::inRandomOrder()->value('id'),
             'images' => $images,

@@ -2,7 +2,6 @@ import Modal from '@/components/modals';
 import { Button } from '@/components/ui/button';
 import PaginationLinks from '@/components/ui/pagination-link';
 import AppLayout from '@/layouts/app-layout';
-import { getBMNType } from '@/lib/get-mn-type';
 import { buildings } from '@/routes';
 import { BreadcrumbItem } from '@/types';
 import { Building } from '@/types/buildings';
@@ -45,6 +44,8 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
     const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
     const buildingData = data.data;
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
 
     const openConfirm = (id: number | string) => {
         setPendingDeleteId(Number(id));
@@ -109,9 +110,17 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                     {/* <Button onClick={() => router.get('buildings/create')}>
                         Tambah
                     </Button> */}
-                    <Button onClick={() => setIsCreateModalOpen(true)}>
-                        Tambah
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsImportOpen(true)}
+                        >
+                            Upload Excel
+                        </Button>
+                        <Button onClick={() => setIsCreateModalOpen(true)}>
+                            Tambah
+                        </Button>
+                    </div>
                 </div>
                 <div className="rounded-md border bg-white shadow-sm">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -123,9 +132,6 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                                     Alamat
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                                    Jenis BMN
                                 </th>
                                 <th className="px-6 py-3"></th>
                             </tr>
@@ -150,15 +156,6 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                                         </td>
                                         <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
                                             {item.address}
-                                        </td>
-                                        <td
-                                            className={`px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900`}
-                                        >
-                                            <span
-                                                className={`inline-flex items-center rounded-full px-3 py-1 font-medium ${getBMNType(item.bmn_type)}`}
-                                            >
-                                                {item.bmn_type}
-                                            </span>
                                         </td>
                                         <td
                                             className={`flex items-center px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900`}
@@ -189,7 +186,7 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={4}
                                         className="px-6 py-4 text-center text-sm text-gray-500"
                                     >
                                         Belum ada data bangunan.
@@ -270,6 +267,79 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                     <Button onClick={() => setIsSuccessModalOpen(false)}>
                         Tutup
                     </Button>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                title="Upload Excel Bangunan"
+            >
+                <div className="space-y-3">
+                    <div className="text-sm text-gray-700">
+                        Header wajib: <code>name</code>, <code>address</code>. Format:{' '}
+                        <code>.xlsx</code> atau{' '}
+                        <code>.csv</code>.
+                    </div>
+                    <input
+                        type="file"
+                        accept=".xlsx,.csv"
+                        onChange={(e) =>
+                            setImportFile(e.target.files?.[0] ?? null)
+                        }
+                    />
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setIsImportOpen(false)}
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (!importFile) return;
+                                router.post(
+                                    '/buildings/import',
+                                    { file: importFile },
+                                    {
+                                        forceFormData: true,
+                                        onSuccess: () => {
+                                            setIsImportOpen(false);
+                                            setImportFile(null);
+                                            Toastify({
+                                                text: 'Import bangunan selesai',
+                                                duration: 3000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#1A5319',
+                                                },
+                                            }).showToast();
+                                        },
+                                        onError: (errors) => {
+                                            const message =
+                                                (errors as Record<string, string>)
+                                                    ?.file || 'Gagal import bangunan';
+                                            Toastify({
+                                                text: message,
+                                                duration: 4000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#B91C1C',
+                                                },
+                                            }).showToast();
+                                        },
+                                    },
+                                );
+                            }}
+                            disabled={!importFile}
+                        >
+                            Upload
+                        </Button>
+                    </div>
                 </div>
             </Modal>
         </AppLayout>

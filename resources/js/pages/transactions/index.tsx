@@ -203,14 +203,22 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                                                     <td className="px-6 py-4 text-sm">
                                                         <span
                                                             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                                                                item.is_booked === 'Yes'
+                                                                item.status === 'expired'
+                                                                    ? 'bg-gray-100 text-gray-700'
+                                                                    : item.status === 'cancelled'
+                                                                      ? 'bg-red-100 text-red-700'
+                                                                      : item.is_booked === 'Yes' || item.status === 'booked'
                                                                     ? 'bg-green-100 text-green-700'
                                                                     : 'bg-yellow-100 text-yellow-700'
                                                             }`}
                                                         >
-                                                            {item.is_booked === 'Yes'
-                                                                ? 'Disetujui'
-                                                                : 'Menunggu'}
+                                                            {item.status === 'expired'
+                                                                ? 'Kadaluarsa'
+                                                                : item.status === 'cancelled'
+                                                                  ? 'Dibatalkan'
+                                                                  : item.is_booked === 'Yes' || item.status === 'booked'
+                                                                    ? 'Disetujui'
+                                                                    : 'Menunggu Pembayaran'}
                                                         </span>
                                                     </td>
                                                     <td className="flex items-center space-x-2 px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
@@ -219,6 +227,8 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                                                             onClick={() => handleApprove(item)}
                                                             disabled={
                                                                 item.is_booked === 'Yes' ||
+                                                                item.status === 'expired' ||
+                                                                item.status === 'cancelled' ||
                                                                 approvingId === item.id
                                                             }
                                                             className="inline-flex items-center rounded-full font-medium transition hover:scale-110 disabled:opacity-50"

@@ -17,7 +17,6 @@ type Props = {
 const EditModal = ({ isOpen, onClose, building }: Props) => {
     const { data, setData, put, processing, errors, reset } = useForm({
         name: building.name,
-        bmn_type: building.bmn_type,
         address: building.address,
     });
 
@@ -25,7 +24,6 @@ const EditModal = ({ isOpen, onClose, building }: Props) => {
         if (building) {
             setData({
                 name: building.name,
-                bmn_type: building.bmn_type,
                 address: building.address,
             });
         }
@@ -85,32 +83,6 @@ const EditModal = ({ isOpen, onClose, building }: Props) => {
                     />
                     {errors.name && (
                         <p className="text-sm text-red-600">{errors.name}</p>
-                    )}
-                </div>
-
-                <div className="flex flex-col space-y-1">
-                    <label htmlFor="bmn_type">Jenis BMN</label>
-                    <select
-                        id="bmn_type"
-                        value={data.bmn_type}
-                        onChange={(e) => setData('bmn_type', e.target.value)}
-                        className="w-full rounded-lg border border-[#454545]/60 px-5 py-2 text-[#454545] focus:outline-[#454545]/90"
-                    >
-                        <option value="">Pilih Jenis BMN</option>
-                        <option className="text-[#454545]" value="Type A">
-                            Type A
-                        </option>
-                        <option className="text-[#454545]" value="Type B">
-                            Type B
-                        </option>
-                        <option className="text-[#454545]" value="Type C">
-                            Type C
-                        </option>
-                    </select>
-                    {errors.bmn_type && (
-                        <p className="text-sm text-red-600">
-                            {errors.bmn_type}
-                        </p>
                     )}
                 </div>
 

@@ -10,8 +10,10 @@ class UserTransactionController extends Controller
 {
     public function index(Request $request)
     {
+        Transaction::expirePending();
+
         $transactions = Transaction::query()
-            ->with(['room.building', 'dataMaster', 'details.user'])
+            ->with(['room.building', 'dataMaster', 'paymentMethod', 'details.user'])
             ->whereHas('details', function ($detailQuery) use ($request) {
                 $detailQuery->where('user_id', $request->user()->id);
             })
@@ -26,6 +28,8 @@ class UserTransactionController extends Controller
 
     public function show(Request $request, Transaction $transaction)
     {
+        Transaction::expirePending();
+
         $ownsTransaction = $transaction->details()
             ->where('user_id', $request->user()->id)
             ->exists();
@@ -82,5 +86,44 @@ class UserTransactionController extends Controller
             'transaction' => $transaction,
             'contactUrl' => $contactUrl,
         ]);
+    }
+
+    public function cancel(Request $request, Transaction $transaction)
+    {
+        Transaction::expirePending();
+
+        $ownsTransaction = $transaction->details()
+            ->where('user_id', $request->user()->id)
+            ->exists();
+
+        if (! $ownsTransaction) {
+            abort(403);
+        }
+
+        if ($transaction->status !== 'pending_payment') {
+            return redirect()
+                ->route('user.transactions.show', $transaction)
+                ->withErrors(['status' => 'Transaksi tidak bisa dibatalkan.']);
+        }
+
+        if ($transaction->expires_at && $transaction->expires_at->isPast()) {
+            $transaction->update([
+                'status' => 'expired',
+                'is_booked' => 'No',
+            ]);
+
+            return redirect()
+                ->route('user.transactions.show', $transaction)
+                ->withErrors(['status' => 'Transaksi sudah kadaluarsa.']);
+        }
+
+        $transaction->update([
+            'status' => 'cancelled',
+            'is_booked' => 'No',
+        ]);
+
+        return redirect()
+            ->route('user.transactions.index')
+            ->with('success', 'Transaksi berhasil dibatalkan.');
     }
 }

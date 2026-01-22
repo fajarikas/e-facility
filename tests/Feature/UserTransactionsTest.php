@@ -15,9 +15,6 @@ test('user can view their transaction list', function () {
     $room = Room::query()->create([
         'name' => 'Ruang 1',
         'price' => 10000,
-        'capacity_count' => 10,
-        'toilet_count' => 1,
-        'area' => 20,
         'description' => 'Test',
         'building_id' => $building->id,
         'images' => [],
@@ -72,9 +69,6 @@ test('user can not view another users transaction', function () {
     $room = Room::query()->create([
         'name' => 'Ruang 2',
         'price' => 10000,
-        'capacity_count' => 10,
-        'toilet_count' => 1,
-        'area' => 20,
         'description' => 'Test',
         'building_id' => $building->id,
         'images' => [],

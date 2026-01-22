@@ -16,6 +16,8 @@ class FacilityOrderController extends Controller
 {
     public function store(Request $request, Room $room)
     {
+        Transaction::expirePending();
+
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:50'],
@@ -32,7 +34,13 @@ class FacilityOrderController extends Controller
         $totalHarga = (int) $room->price * $days;
 
         $overlapsBooked = $room->transactions()
-            ->where('is_booked', 'Yes')
+            ->whereIn('status', ['pending_payment', 'booked'])
+            ->where(function ($q) {
+                $q->where('status', 'booked')
+                    ->orWhere(function ($q2) {
+                        $q2->where('status', 'pending_payment')->where('expires_at', '>', now());
+                    });
+            })
             ->whereDate('check_in_date', '<=', $checkOut->toDateString())
             ->whereDate('check_out_date', '>=', $checkIn->toDateString())
             ->exists();
@@ -79,6 +87,8 @@ class FacilityOrderController extends Controller
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_address' => $validated['customer_address'],
+                'status' => 'pending_payment',
+                'expires_at' => now()->addMinutes(15),
                 'total_harga' => $totalHarga,
                 'room_id' => $room->id,
                 'is_booked' => 'No',

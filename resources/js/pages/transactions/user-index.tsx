@@ -23,7 +23,13 @@ export default function UserTransactionsIndex({ data }: Props) {
         `Rp${new Intl.NumberFormat('id-ID').format(Number(amount) || 0)}`;
 
     const statusLabel = (t: TransactionData) =>
-        t.is_booked === 'Yes' ? 'Disetujui' : 'Menunggu Konfirmasi';
+        t.status === 'booked' || t.is_booked === 'Yes'
+            ? 'Booked'
+            : t.status === 'expired'
+              ? 'Kadaluarsa'
+              : t.status === 'cancelled'
+                ? 'Dibatalkan'
+                : 'Menunggu Pembayaran';
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -90,9 +96,13 @@ export default function UserTransactionsIndex({ data }: Props) {
                                                 <td className="px-6 py-4 text-sm">
                                                     <span
                                                         className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                                                            item.is_booked ===
-                                                            'Yes'
+                                                            item.status === 'booked' ||
+                                                            item.is_booked === 'Yes'
                                                                 ? 'bg-green-100 text-green-700'
+                                                                : item.status === 'expired'
+                                                                  ? 'bg-gray-100 text-gray-700'
+                                                                  : item.status === 'cancelled'
+                                                                    ? 'bg-red-100 text-red-700'
                                                                 : 'bg-yellow-100 text-yellow-700'
                                                         }`}
                                                     >

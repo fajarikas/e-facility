@@ -29,10 +29,10 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
-import { dashboard, logout } from '@/routes';
+import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, LogOut, Menu, Search } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -226,14 +226,14 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
-                        <Link
+                        {/* <Link
                             href={logout()}
                             as="button"
                             className="hidden items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 lg:inline-flex"
                         >
                             <LogOut className="mr-2 size-4" />
                             Logout
-                        </Link>
+                        </Link> */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button

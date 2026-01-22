@@ -7,11 +7,27 @@ type Props = {
     room: RoomData;
     isLiked: boolean;
     onToggleLikeSuccess?: () => void;
+    availability?: 'available' | 'pending_payment' | 'booked';
 };
 
-export default function FacilityCard({ room, isLiked, onToggleLikeSuccess }: Props) {
+export default function FacilityCard({
+    room,
+    isLiked,
+    onToggleLikeSuccess,
+    availability,
+}: Props) {
     const firstImage = room.images?.[0];
     const rupiah = (amount: number) => `Rp${new Intl.NumberFormat('id-ID').format(amount)}`;
+
+    const badge = (() => {
+        if (availability === 'booked') {
+            return { text: 'Booked', className: 'bg-red-100 text-red-700 border-red-200' };
+        }
+        if (availability === 'pending_payment') {
+            return { text: 'Menunggu Pembayaran', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' };
+        }
+        return { text: 'Tersedia', className: 'bg-green-100 text-green-700 border-green-200' };
+    })();
 
     return (
         <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -33,9 +49,14 @@ export default function FacilityCard({ room, isLiked, onToggleLikeSuccess }: Pro
                     </div>
 
                     <div className="mt-3">
-                        <p className="text-sm font-semibold text-gray-900">
-                            {room.name}
-                        </p>
+                        <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-semibold text-gray-900">
+                                {room.name}
+                            </p>
+                            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${badge.className}`}>
+                                {badge.text}
+                            </span>
+                        </div>
                         <p className="mt-1 text-xs text-gray-500">
                             {room.building?.name}
                         </p>

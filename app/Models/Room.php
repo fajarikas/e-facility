@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
+    use HasFactory;
 
     protected $casts = [
         'images' => 'array',
@@ -15,9 +17,6 @@ class Room extends Model
     protected $fillable = [
         "name",
         "price",
-        "capacity_count",
-        "toilet_count",
-        "area",
         "description",
         "building_id",
         "images"

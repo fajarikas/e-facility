@@ -18,7 +18,6 @@ class BuildingFactory extends Factory
     {
         return [
             'name' => $this->faker->city(),
-            'bmn_type' => $this->faker->randomElement(['Type A', 'Type B', 'Type C']),
             'address' => $this->faker->address(),
         ];
     }

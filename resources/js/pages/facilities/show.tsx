@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { RichText } from '@/components/ui/rich-text';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { DataMaster, PaymentMethod } from '@/types/data-master';
@@ -143,21 +144,9 @@ export default function FacilityShow({
                                 </div>
                                 <div>
                                     <span className="text-gray-500">
-                                        Kapasitas:
+                                        Info:
                                     </span>{' '}
-                                    {room.capacity_count} orang
-                                </div>
-                                <div>
-                                    <span className="text-gray-500">
-                                        Toilet:
-                                    </span>{' '}
-                                    {room.toilet_count}
-                                </div>
-                                <div>
-                                    <span className="text-gray-500">
-                                        Luas:
-                                    </span>{' '}
-                                    {room.area} m²
+                                    Silakan cek deskripsi untuk detail fasilitas.
                                 </div>
                             </div>
                         </div>
@@ -168,9 +157,9 @@ export default function FacilityShow({
                     <div className="text-sm font-semibold text-gray-900">
                         Deskripsi
                     </div>
-                    <p className="mt-2 text-sm leading-relaxed text-gray-700">
-                        {room.description}
-                    </p>
+                    <div className="mt-2">
+                        <RichText html={room.description || ''} />
+                    </div>
                 </div>
 
                 <div className="rounded-xl border border-gray-200 bg-white p-4">

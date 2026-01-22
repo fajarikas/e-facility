@@ -17,6 +17,8 @@ class TransactionController extends Controller
      */
     public function index()
     {
+        Transaction::expirePending();
+
         $transactions = Transaction::with(['room.building', 'details.user', 'dataMaster', 'paymentMethod'])
             ->latest()
             ->paginate(10);
@@ -91,6 +93,8 @@ class TransactionController extends Controller
      */
     public function update(Request $request, Transaction $transaction)
     {
+        Transaction::expirePending();
+
         $validatedData = $request->validate([
             'is_booked' => 'required|in:Yes,No',
         ]);
@@ -112,8 +116,15 @@ class TransactionController extends Controller
 
     public function approve(Transaction $transaction)
     {
+        Transaction::expirePending();
+
+        if (in_array($transaction->status, ['cancelled', 'expired'], true)) {
+            return redirect()->route('transactions')->with('success', 'Transaksi tidak bisa di-approve karena sudah dibatalkan/kadaluarsa.');
+        }
+
         $transaction->update([
             'is_booked' => 'Yes',
+            'status' => 'booked',
         ]);
 
         return redirect()->route('transactions')->with('success', 'Transaksi disetujui.');
