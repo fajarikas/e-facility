@@ -26,6 +26,7 @@ class Transaction2025Seeder extends Seeder
         $rooms = Room::query()->orderBy('id')->limit(15)->get();
         if ($rooms->isEmpty()) {
             $this->command?->warn('Transaction2025Seeder skipped: no rooms found.');
+
             return;
         }
 
@@ -43,6 +44,7 @@ class Transaction2025Seeder extends Seeder
         $dataMasterId = DataMaster::query()->value('id');
         if (! $dataMasterId) {
             $this->command?->warn('Transaction2025Seeder skipped: no data_masters found.');
+
             return;
         }
 
@@ -61,8 +63,23 @@ class Transaction2025Seeder extends Seeder
             'expired',
         ];
 
+        $monthlyCounts = [
+            1 => 10,
+            2 => 15,
+            3 => 48,
+            4 => 22,
+            5 => 31,
+            6 => 27,
+            7 => 55,
+            8 => 40,
+            9 => 18,
+            10 => 64,
+            11 => 12,
+            12 => 25,
+        ];
+
         foreach (range(1, 12) as $month) {
-            $count = 80;
+            $count = $monthlyCounts[$month];
 
             foreach (range(1, $count) as $i) {
                 $room = $rooms->random();
@@ -124,4 +141,3 @@ class Transaction2025Seeder extends Seeder
         }
     }
 }
-

@@ -1,22 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\BuildingImportController as AdminBuildingImportController;
+use App\Http\Controllers\Admin\DataMasterController as AdminDataMasterController;
+use App\Http\Controllers\Admin\PaymentMethodController as AdminPaymentMethodController;
+use App\Http\Controllers\Admin\RoomImportController as AdminRoomImportController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\BuildingController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\FacilityLikeController;
 use App\Http\Controllers\FacilityOrderController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserTransactionController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\DataMasterController as AdminDataMasterController;
-use App\Http\Controllers\Admin\PaymentMethodController as AdminPaymentMethodController;
-use App\Http\Controllers\Admin\BuildingImportController as AdminBuildingImportController;
-use App\Http\Controllers\Admin\RoomImportController as AdminRoomImportController;
-use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\WelcomeController;
-use App\Models\Building;
-use App\Models\Room;
-use App\Models\Transaction;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -47,20 +45,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin,superadmin'])->group(function () {
-        Route::get('dashboard', function () {
-            return Inertia::render('dashboard', [
-                'stats' => [
-                    'buildings' => Building::count(),
-                    'rooms' => Room::count(),
-                    'transactions' => Transaction::count(),
-                    'pending_transactions' => Transaction::where('is_booked', 'No')->count(),
-                ],
-                'recent_transactions' => Transaction::with(['room.building', 'details.user'])
-                    ->latest()
-                    ->take(5)
-                    ->get(),
-            ]);
-        })->name('dashboard');
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('buildings', [BuildingController::class, 'index'])->name('buildings');
         Route::post('buildings/import', [AdminBuildingImportController::class, 'store'])->name('buildings.import');
@@ -97,5 +82,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

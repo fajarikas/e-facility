@@ -1,7 +1,7 @@
+import DashboardLineChart from '@/components/dashboard/DashboardLineChart';
+import RecentTransactionsTable from '@/components/dashboard/RecentTransactionTable';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
-import RecentTransactionsTable from "@/components/dashboard/RecentTransactionTable";
-import DashboardLineChart from "@/components/dashboard/DashboardLineChart";
 import { type BreadcrumbItem } from '@/types';
 import { TransactionData } from '@/types/transactions';
 import { Head } from '@inertiajs/react';
@@ -18,12 +18,14 @@ type Props = {
         buildings: number;
         rooms: number;
         transactions: number;
+        monthly_transaction: any[];
         pending_transactions: number;
     };
     recent_transactions: TransactionData[];
 };
 
 export default function Dashboard({ stats, recent_transactions }: Props) {
+    console.log('🚀 ~ Dashboard ~ stats:', stats);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -48,24 +50,19 @@ export default function Dashboard({ stats, recent_transactions }: Props) {
                         </p>
                     </div>
                     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <p className="text-sm text-gray-500">Menunggu Approval</p>
+                        <p className="text-sm text-gray-500">
+                            Menunggu Approval
+                        </p>
                         <p className="mt-2 text-2xl font-semibold text-yellow-600">
                             {stats.pending_transactions}
                         </p>
                     </div>
                 </div>
-               <DashboardLineChart
-                data={[
-                    { month: "Jan", rent: 10, income: 15000000 },
-                    { month: "Feb", rent: 12, income: 18000000 },
-                    { month: "Mar", rent: 15, income: 22000000 },
-                    { month: "Apr", rent: 12, income: 17000000 },
-                    { month: "May", rent: 20, income: 30000000 },
-                    { month: "Jun", rent: 21, income: 32000000 },
-                ]}
+                <DashboardLineChart data={stats.monthly_transaction} />
+
+                <RecentTransactionsTable
+                    recent_transactions={recent_transactions}
                 />
-               
-                <RecentTransactionsTable recent_transactions={recent_transactions} />
             </div>
         </AppLayout>
     );
