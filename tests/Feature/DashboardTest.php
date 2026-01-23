@@ -56,3 +56,33 @@ test('dashboard year filter returns yearly income for selected year', function (
             ->where('stats.yearly_income', 100_000)
         );
 });
+
+test('dashboard includes transaction counts by status', function () {
+    $this->actingAs(User::factory()->create(['role' => 'admin']));
+
+    Transaction::factory()->create([
+        'status' => 'booked',
+        'is_booked' => 'Yes',
+    ]);
+
+    Transaction::factory()->create([
+        'status' => 'booked',
+        'is_booked' => 'Yes',
+    ]);
+
+    Transaction::factory()->create([
+        'status' => 'cancelled',
+        'is_booked' => 'No',
+    ]);
+
+    $this->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('dashboard')
+            ->where('stats.count_transactions', function ($value) {
+                return $value->count() === 2
+                    && (int) ($value->firstWhere('status', 'booked')['count'] ?? 0) === 2
+                    && (int) ($value->firstWhere('status', 'cancelled')['count'] ?? 0) === 1;
+            })
+        );
+});

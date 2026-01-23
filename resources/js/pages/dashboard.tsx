@@ -1,4 +1,5 @@
 import DashboardLineChart from '@/components/dashboard/DashboardLineChart';
+import DashboardPieChart from '@/components/dashboard/DashboardPieChart';
 import RecentTransactionsTable from '@/components/dashboard/RecentTransactionTable';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
@@ -23,6 +24,7 @@ type Props = {
         yearly_income: number;
         monthly_transaction: any[];
         pending_transactions: number;
+        count_transactions: { status: string; count: number }[];
     };
     recent_transactions: TransactionData[];
 };
@@ -84,6 +86,7 @@ export default function Dashboard({ stats, recent_transactions }: Props) {
                         </p>
                     </div>
                 </div>
+                <div className="w-full flex space-x-4 items-center h-full">
                 <DashboardLineChart
                     data={stats.monthly_transaction}
                     selectedYear={stats.selected_year}
@@ -103,6 +106,8 @@ export default function Dashboard({ stats, recent_transactions }: Props) {
                         );
                     }}
                 />
+                <DashboardPieChart data={stats.count_transactions} />
+                </div>
 
                 <RecentTransactionsTable
                     recent_transactions={recent_transactions}

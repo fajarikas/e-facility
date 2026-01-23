@@ -122,7 +122,7 @@ export default function DashboardLineChart({ data, selectedYear, onYearChange }:
     }, [filteredData]);
 
     return (
-        <div className="rounded-xl border bg-white p-4 shadow-sm">
+        <div className="rounded-xl w-2/3 border bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-3">
                 <label className="text-sm font-medium text-gray-700">
                     Tahun

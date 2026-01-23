@@ -63,7 +63,7 @@ class DashboardController extends Controller
                 'buildings' => Building::count(),
                 'rooms' => Room::count(),
                 'total_income' => (int) Transaction::sum('total_harga'),
-
+                'count_transactions' => Transaction::groupBy('status')->selectRaw('status, COUNT(*) as count')->get(),
                 'transactions' => Transaction::count(),
                 'selected_year' => $selectedYear,
                 'yearly_income' => (int) $yearlyIncomeQuery->sum('total_harga'),
