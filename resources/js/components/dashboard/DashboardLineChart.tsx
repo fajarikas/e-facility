@@ -1,9 +1,25 @@
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 type ChartData = { month: string; year: number; rent: number; income?: number };
-type Props = { data: ChartData[]; selectedYear: number | 'all'; onYearChange: (year: number | 'all') => void };
+type Props = {
+    data: ChartData[];
+    selectedYear: number | 'all';
+    onYearChange: (year: number | 'all') => void;
+    showYearSelect?: boolean;
+};
 
-export default function DashboardLineChart({ data, selectedYear, onYearChange }: Props) {
+export default function DashboardLineChart({
+    data,
+    selectedYear,
+    onYearChange,
+    showYearSelect = true,
+}: Props) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const chartRef = useRef<any>(null);
 
@@ -122,38 +138,44 @@ export default function DashboardLineChart({ data, selectedYear, onYearChange }:
     }, [filteredData]);
 
     return (
-        <div className="rounded-xl w-2/3 border bg-white p-4 shadow-sm">
-            <div className="mb-3 flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700">
-                    Tahun
-                </label>
+        <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between gap-4">
+                <CardTitle className="text-base">Tren Transaksi</CardTitle>
+                {showYearSelect ? (
+                    <div className="flex items-center gap-3">
+                        <label className="text-sm text-muted-foreground">
+                            Tahun
+                        </label>
 
-                <select
-                    value={localSelectedYear}
-                    onChange={(e) => {
-                        const nextYear =
-                            e.target.value === 'all'
-                                ? 'all'
-                                : Number(e.target.value);
+                        <select
+                            value={localSelectedYear}
+                            onChange={(e) => {
+                                const nextYear =
+                                    e.target.value === 'all'
+                                        ? 'all'
+                                        : Number(e.target.value);
 
-                        setLocalSelectedYear(nextYear);
-                        onYearChange(nextYear);
-                    }}
-                    className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none"
-                >
-                    <option value="all">Semua</option>
+                                setLocalSelectedYear(nextYear);
+                                onYearChange(nextYear);
+                            }}
+                            className="rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                        >
+                            <option value="all">Semua</option>
 
-                    {years.map((y) => (
-                        <option key={y} value={y}>
-                            {y}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="h-64">
-                <canvas ref={canvasRef} />
-            </div>
-        </div>
+                            {years.map((y) => (
+                                <option key={y} value={y}>
+                                    {y}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                ) : null}
+            </CardHeader>
+            <CardContent>
+                <div className="h-72">
+                    <canvas ref={canvasRef} />
+                </div>
+            </CardContent>
+        </Card>
     );
 }

@@ -1,3 +1,9 @@
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { useEffect, useMemo, useRef } from 'react';
 
 type StatusCount = {
@@ -59,13 +65,8 @@ export default function DashboardPieChart({ data }: Props) {
             }
 
             const chartJs = await import('chart.js');
-            const {
-                Chart,
-                PieController,
-                ArcElement,
-                Tooltip,
-                Legend,
-            } = chartJs;
+            const { Chart, PieController, ArcElement, Tooltip, Legend } =
+                chartJs;
 
             Chart.register(PieController, ArcElement, Tooltip, Legend);
 
@@ -97,8 +98,7 @@ export default function DashboardPieChart({ data }: Props) {
                         },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) =>
-                                    `${ctx.label}: ${ctx.parsed}`,
+                                label: (ctx) => `${ctx.label}: ${ctx.parsed}`,
                             },
                         },
                     },
@@ -115,22 +115,23 @@ export default function DashboardPieChart({ data }: Props) {
     }, [normalized]);
 
     return (
-        <div className="rounded-xl w-1/3 border bg-white p-4 h-full shadow-sm">
-            <div className="mb-3">
-                <p className="text-sm font-medium text-gray-700">
-                    Transaksi per Status
-                </p>
-            </div>
-
-            {normalized.length ? (
-                <div className="h-64">
-                    <canvas ref={canvasRef} />
-                </div>
-            ) : (
-                <div className="flex h-64 items-center justify-center text-sm text-gray-500">
-                    Belum ada data transaksi.
-                </div>
-            )}
-        </div>
+        <Card className="h-full">
+            <CardHeader>
+                <CardTitle className="text-base">
+                    Status Transaksi
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {normalized.length ? (
+                    <div className="h-72">
+                        <canvas ref={canvasRef} />
+                    </div>
+                ) : (
+                    <div className="flex h-72 items-center justify-center text-sm text-muted-foreground">
+                        Belum ada data transaksi.
+                    </div>
+                )}
+            </CardContent>
+        </Card>
     );
 }
