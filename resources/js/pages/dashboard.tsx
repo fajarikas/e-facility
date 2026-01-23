@@ -18,6 +18,7 @@ type Props = {
         buildings: number;
         rooms: number;
         transactions: number;
+        total_income: number;
         monthly_transaction: any[];
         pending_transactions: number;
     };
@@ -55,6 +56,17 @@ export default function Dashboard({ stats, recent_transactions }: Props) {
                         </p>
                         <p className="mt-2 text-2xl font-semibold text-yellow-600">
                             {stats.pending_transactions}
+                        </p>
+                    </div>
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                        <p className="text-sm text-gray-500">
+                            Total Pendapatan
+                        </p>
+                        <p className="mt-2 text-2xl font-semibold text-green-600">
+                            {stats.total_income.toLocaleString('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                            })}
                         </p>
                     </div>
                 </div>
