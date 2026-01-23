@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { TransactionData } from '@/types/transactions';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,6 +19,8 @@ type Props = {
         rooms: number;
         transactions: number;
         total_income: number;
+        selected_year: number | 'all';
+        yearly_income: number;
         monthly_transaction: any[];
         pending_transactions: number;
     };
@@ -26,7 +28,6 @@ type Props = {
 };
 
 export default function Dashboard({ stats, recent_transactions }: Props) {
-    console.log('🚀 ~ Dashboard ~ stats:', stats);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -69,8 +70,39 @@ export default function Dashboard({ stats, recent_transactions }: Props) {
                             })}
                         </p>
                     </div>
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                        <p className="text-sm text-gray-500">
+                            {stats.selected_year === 'all'
+                                ? 'Total Pendapatan (Semua Tahun)'
+                                : `Total Pendapatan Tahun ${stats.selected_year}`}
+                        </p>
+                        <p className="mt-2 text-2xl font-semibold text-green-600">
+                            {stats.yearly_income.toLocaleString('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                            })}
+                        </p>
+                    </div>
                 </div>
-                <DashboardLineChart data={stats.monthly_transaction} />
+                <DashboardLineChart
+                    data={stats.monthly_transaction}
+                    selectedYear={stats.selected_year}
+                    onYearChange={(year) => {
+                        router.get(
+                            dashboard.url({
+                                query: {
+                                    year,
+                                },
+                            }),
+                            {},
+                            {
+                                preserveScroll: true,
+                                preserveState: true,
+                                replace: true,
+                            },
+                        );
+                    }}
+                />
 
                 <RecentTransactionsTable
                     recent_transactions={recent_transactions}
