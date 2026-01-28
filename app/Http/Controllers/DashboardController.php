@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Building;
 use App\Models\Room;
 use App\Models\Transaction;
+use App\Support\TransactionCalendar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
@@ -14,7 +15,15 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
+        Transaction::expirePending();
+
         $requestedYear = $request->query('year');
+        $requestedCalendarMonth = $request->query('calendar_month');
+
+        $calendarMonthDate = now()->startOfMonth();
+        if (is_string($requestedCalendarMonth) && preg_match('/^\d{4}-\d{2}$/', $requestedCalendarMonth) === 1) {
+            $calendarMonthDate = Carbon::createFromFormat('Y-m', $requestedCalendarMonth)->startOfMonth();
+        }
 
         $latestCreatedAt = Transaction::query()->max('created_at');
         $latestYear = $latestCreatedAt ? Carbon::parse($latestCreatedAt)->year : null;
@@ -201,6 +210,7 @@ class DashboardController extends Controller
                 'pending_transactions' => Transaction::where('is_booked', 'No')->count(),
                 'count_transactions' => $countTransactions,
             ],
+            'calendar' => TransactionCalendar::forMonth($calendarMonthDate),
             'recent_transactions' => Transaction::with(['room.building', 'details.user'])
                 ->latest()
                 ->take(5)

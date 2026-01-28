@@ -6,7 +6,9 @@ use App\Models\Room;
 use App\Models\Transaction;
 use App\Models\Transaction_Detail;
 use App\Models\User;
+use App\Support\TransactionCalendar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -19,6 +21,13 @@ class TransactionController extends Controller
     {
         Transaction::expirePending();
 
+        $requestedCalendarMonth = request()->query('calendar_month');
+
+        $calendarMonthDate = now()->startOfMonth();
+        if (is_string($requestedCalendarMonth) && preg_match('/^\d{4}-\d{2}$/', $requestedCalendarMonth) === 1) {
+            $calendarMonthDate = Carbon::createFromFormat('Y-m', $requestedCalendarMonth)->startOfMonth();
+        }
+
         $transactions = Transaction::with(['room.building', 'details.user', 'dataMaster', 'paymentMethod'])
             ->latest()
             ->paginate(10);
@@ -29,6 +38,7 @@ class TransactionController extends Controller
             'data' => $transactions,
             'rooms' => $rooms,
             'users' => $users,
+            'calendar' => TransactionCalendar::forMonth($calendarMonthDate),
         ]);
     }
 

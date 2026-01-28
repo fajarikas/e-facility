@@ -4,9 +4,14 @@ import PaginationLinks from '@/components/ui/pagination-link';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, User } from '@/types';
 import { RoomData } from '@/types/rooms';
-import { PaginatedTransactionData, TransactionData } from '@/types/transactions';
+import {
+    PaginatedTransactionData,
+    TransactionCalendarBookingData,
+    TransactionCalendarData,
+    TransactionData,
+} from '@/types/transactions';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { IoMdEye, IoMdTrash } from 'react-icons/io';
 import { MdCheckCircle } from 'react-icons/md';
 import Toastify from 'toastify-js';
@@ -24,15 +29,131 @@ type Props = {
     data: PaginatedTransactionData;
     rooms: RoomData[];
     users: User[];
+    calendar: TransactionCalendarData;
 };
 
-const TransactionsIndex = ({ data, rooms, users }: Props) => {
+const dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+
+function pad2(value: number): string {
+    return value.toString().padStart(2, '0');
+}
+
+function formatYmd(date: Date): string {
+    return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function parseMonth(month: string): { year: number; monthIndex: number } {
+    const [yearString, monthString] = month.split('-');
+    return {
+        year: Number(yearString),
+        monthIndex: Number(monthString) - 1,
+    };
+}
+
+function addMonths(month: string, delta: number): string {
+    const { year, monthIndex } = parseMonth(month);
+    const date = new Date(year, monthIndex + delta, 1);
+    return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}`;
+}
+
+function labelDate(dateKey: string): string {
+    const [yearString, monthString, dayString] = dateKey.split('-');
+    const date = new Date(Number(yearString), Number(monthString) - 1, Number(dayString));
+
+    return date.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+}
+
+const TransactionsIndex = ({ data, rooms, users, calendar }: Props) => {
     const transactionData = data.data;
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
     const [approvingId, setApprovingId] = useState<number | null>(null);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+    const [isCalendarNavigating, setIsCalendarNavigating] = useState(false);
+
+    const { year: calendarYear, monthIndex: calendarMonthIndex } = useMemo(
+        () => parseMonth(calendar.month),
+        [calendar.month],
+    );
+
+    const calendarMonthLabel = useMemo(() => {
+        const date = new Date(calendarYear, calendarMonthIndex, 1);
+        return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    }, [calendarMonthIndex, calendarYear]);
+
+    const days = useMemo(() => {
+        const firstOfMonth = new Date(calendarYear, calendarMonthIndex, 1);
+        const firstDay = firstOfMonth.getDay(); // 0 = Minggu
+        const mondayOffset = (firstDay + 6) % 7; // 0 = Senin
+
+        const gridStart = new Date(calendarYear, calendarMonthIndex, 1 - mondayOffset);
+
+        return Array.from({ length: 42 }, (_, idx) => {
+            const date = new Date(gridStart);
+            date.setDate(gridStart.getDate() + idx);
+
+            const dateKey = formatYmd(date);
+            const isInMonth = date.getMonth() === calendarMonthIndex;
+            const counts = calendar.counts_by_date[dateKey];
+
+            return {
+                date,
+                dateKey,
+                isInMonth,
+                counts,
+            };
+        });
+    }, [calendar.counts_by_date, calendarMonthIndex, calendarYear]);
+
+    const openDay = (dateKey: string) => {
+        setSelectedDate(dateKey);
+        setIsCalendarModalOpen(true);
+    };
+
+    const closeCalendarModal = () => {
+        setIsCalendarModalOpen(false);
+        setSelectedDate(null);
+    };
+
+    const closeCalendar = () => {
+        setIsCalendarOpen(false);
+        closeCalendarModal();
+    };
+
+    const selectedBookings: TransactionCalendarBookingData[] = useMemo(() => {
+        if (!selectedDate) {
+            return [];
+        }
+
+        return calendar.bookings_by_date[selectedDate] ?? [];
+    }, [calendar.bookings_by_date, selectedDate]);
+
+    const navigateCalendarMonth = (delta: number) => {
+        const nextMonth = addMonths(calendar.month, delta);
+
+        setIsCalendarNavigating(true);
+        router.get(
+            '/transactions',
+            { calendar_month: nextMonth },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+                only: ['calendar'],
+                onFinish: () => setIsCalendarNavigating(false),
+            },
+        );
+    };
 
     const openConfirm = (id: number | string) => {
         setPendingDeleteId(Number(id));
@@ -98,10 +219,129 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                     <h1 className="text-2xl font-bold text-gray-800">
                         Daftar Transaksi
                     </h1>
-                    <Button onClick={() => setIsCreateModalOpen(true)}>
-                        Tambah Transaksi
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        {isCalendarOpen ? (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={closeCalendar}
+                            >
+                                Tutup Kalender
+                            </Button>
+                        ) : (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() => setIsCalendarOpen(true)}
+                            >
+                                Kalender
+                            </Button>
+                        )}
+                        <Button onClick={() => setIsCreateModalOpen(true)}>
+                            Tambah Transaksi
+                        </Button>
+                    </div>
                 </div>
+
+                {isCalendarOpen && (
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-lg">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-800">
+                                    Kalender Booking
+                                </h2>
+                                <p className="mt-1 text-sm text-gray-600">
+                                    {calendarMonthLabel} • Klik tanggal untuk lihat detail
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => navigateCalendarMonth(-1)}
+                                    disabled={isCalendarNavigating}
+                                >
+                                    Bulan Sebelumnya
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => navigateCalendarMonth(1)}
+                                    disabled={isCalendarNavigating}
+                                >
+                                    Bulan Berikutnya
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-7 gap-2">
+                            {dayLabels.map((label) => (
+                                <div
+                                    key={label}
+                                    className="text-center text-xs font-semibold tracking-wide text-gray-600 uppercase"
+                                >
+                                    {label}
+                                </div>
+                            ))}
+
+                            {days.map((cell) => {
+                                const total = cell.counts?.total ?? 0;
+                                const booked = cell.counts?.booked ?? 0;
+                                const pending = cell.counts?.pending ?? 0;
+
+                                return (
+                                    <button
+                                        key={cell.dateKey}
+                                        type="button"
+                                        onClick={() => openDay(cell.dateKey)}
+                                        className={[
+                                            'relative flex h-20 flex-col justify-between rounded-lg border p-2 text-left transition',
+                                            cell.isInMonth
+                                                ? 'border-gray-200 hover:bg-blue-50/50'
+                                                : 'border-gray-100 bg-gray-50 text-gray-400',
+                                        ].join(' ')}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="text-sm font-semibold">
+                                                {cell.date.getDate()}
+                                            </div>
+                                            {total > 0 && (
+                                                <div className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
+                                                    {total}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {total > 0 ? (
+                                            <div className="flex items-center gap-2 text-xs">
+                                                {booked > 0 && (
+                                                    <div className="flex items-center gap-1 text-green-700">
+                                                        <span className="h-2 w-2 rounded-full bg-green-600"></span>
+                                                        <span>
+                                                            {booked} disetujui
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {pending > 0 && (
+                                                    <div className="flex items-center gap-1 text-amber-700">
+                                                        <span className="h-2 w-2 rounded-full bg-amber-600"></span>
+                                                        <span>
+                                                            {pending} pending
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="text-xs text-gray-500">
+                                                Tidak ada booking
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-lg">
                     <div className="inline-block min-w-full align-middle">
@@ -283,6 +523,70 @@ const TransactionsIndex = ({ data, rooms, users }: Props) => {
                     users={users}
                 />
             )}
+
+            <Modal
+                isOpen={isCalendarModalOpen}
+                onClose={closeCalendarModal}
+                title={selectedDate ? labelDate(selectedDate) : 'Detail Booking'}
+                widthClass="max-w-2xl"
+            >
+                {selectedBookings.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-gray-600">
+                        Tidak ada booking di tanggal ini.
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-3">
+                        {selectedBookings.map((booking) => (
+                            <div
+                                key={booking.id}
+                                className="rounded-lg border border-gray-200 bg-white p-4"
+                            >
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div className="flex flex-col">
+                                        <div className="text-base font-semibold text-gray-900">
+                                            {booking.room_name}
+                                        </div>
+                                        <div className="text-sm text-gray-700">
+                                            {booking.building_name}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <span
+                                            className={[
+                                                'inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold',
+                                                booking.status === 'booked'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : 'bg-amber-100 text-amber-700',
+                                            ].join(' ')}
+                                        >
+                                            {booking.status === 'booked'
+                                                ? 'Disetujui'
+                                                : 'Menunggu Pembayaran'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-gray-700 sm:grid-cols-2">
+                                    <div>
+                                        <span className="font-semibold">
+                                            Dibooking oleh:
+                                        </span>{' '}
+                                        {booking.booked_by}
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold">
+                                            Durasi:
+                                        </span>{' '}
+                                        {booking.check_in_date} →{' '}
+                                        {booking.check_out_date}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </Modal>
 
             <Modal
                 isOpen={isConfirmOpen}

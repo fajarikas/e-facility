@@ -39,3 +39,27 @@ export interface PaginatedTransactionData {
     per_page: number;
     links: TransactionPaginationLink[];
 }
+
+export interface TransactionCalendarBookingData {
+    id: number;
+    status: 'pending_payment' | 'booked';
+    check_in_date: string;
+    check_out_date: string;
+    room_name: string;
+    building_name: string;
+    booked_by: string;
+}
+
+export interface TransactionCalendarCountData {
+    total: number;
+    booked: number;
+    pending: number;
+}
+
+export interface TransactionCalendarData {
+    month: string; // YYYY-MM
+    range_start: string; // YYYY-MM-DD
+    range_end: string; // YYYY-MM-DD
+    counts_by_date: Record<string, TransactionCalendarCountData>;
+    bookings_by_date: Record<string, TransactionCalendarBookingData[]>;
+}
