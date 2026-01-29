@@ -5,9 +5,10 @@ import AppLayout from '@/layouts/app-layout';
 import { buildings } from '@/routes';
 import { BreadcrumbItem } from '@/types';
 import { Building } from '@/types/buildings';
+import SearchFilter from '@/components/search/SearchFilter';
 import { PaginatedData } from '@/types/paginaton';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoMdEye, IoMdTrash } from 'react-icons/io';
 import { MdEditDocument } from 'react-icons/md';
 import Toastify from 'toastify-js';
@@ -25,7 +26,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Buildings = ({ data }: { data: PaginatedData }) => {
+const Buildings = ({
+    data,
+    filters,
+}: {
+    data: PaginatedData;
+    filters: { search?: string | null };
+}) => {
     const [isSuccessModalOpen, setIsSuccessModalOpen] =
         useState<boolean>(false);
     const [successMessage, setSuccessMessage] = useState<string>('');
@@ -46,6 +53,11 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
     const buildingData = data.data;
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
+    const [searchValue, setSearchValue] = useState(filters.search ?? '');
+
+    useEffect(() => {
+        setSearchValue(filters.search ?? '');
+    }, [filters.search]);
 
     const openConfirm = (id: number | string) => {
         setPendingDeleteId(Number(id));
@@ -122,6 +134,19 @@ const Buildings = ({ data }: { data: PaginatedData }) => {
                         </Button>
                     </div>
                 </div>
+                <SearchFilter
+                    placeholder="Cari bangunan..."
+                    value={searchValue}
+                    onChange={setSearchValue}
+                    onSubmit={(value) => {
+                        router.get(
+                            buildings().url,
+                            { search: value || undefined },
+                            { preserveState: true, preserveScroll: true, replace: true },
+                        );
+                    }}
+                />
+                      
                 <div className="rounded-md border bg-white shadow-sm">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">

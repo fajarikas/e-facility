@@ -1,4 +1,5 @@
 import Modal from '@/components/modals';
+import SearchFilter from '@/components/search/SearchFilter';
 import { Button } from '@/components/ui/button';
 import PaginationLinks from '@/components/ui/pagination-link';
 import AppLayout from '@/layouts/app-layout';
@@ -8,7 +9,7 @@ import { Building } from '@/types/buildings';
 import { PaginatedRoomData, RoomData } from '@/types/rooms';
 import { htmlToText } from '@/lib/rich-text';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoMdEye, IoMdTrash } from 'react-icons/io';
 import { MdEditDocument } from 'react-icons/md';
 import Toastify from 'toastify-js';
@@ -20,6 +21,7 @@ import EditRoomModal from './(components)/EditModal';
 type Props = {
     data: PaginatedRoomData;
     buildings: Building[];
+    filters: { search?: string | null };
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -29,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const index = ({ data, buildings }: Props) => {
+const index = ({ data, buildings, filters }: Props) => {
     console.log('🚀 ~ index ~ data:', data);
     console.log('🚀 ~ index ~ buildings:', buildings);
     const roomData = data.data;
@@ -43,6 +45,11 @@ const index = ({ data, buildings }: Props) => {
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
+    const [searchValue, setSearchValue] = useState(filters.search ?? '');
+
+    useEffect(() => {
+        setSearchValue(filters.search ?? '');
+    }, [filters.search]);
 
     const openConfirm = (id: number | string) => {
         setPendingDeleteId(Number(id));
@@ -109,6 +116,23 @@ const index = ({ data, buildings }: Props) => {
                         </Button>
                     </div>
                 </div>
+
+                <SearchFilter
+                    placeholder="Cari ruangan..."
+                    value={searchValue}
+                    onChange={setSearchValue}
+                    onSubmit={(value) => {
+                        router.get(
+                            rooms().url,
+                            { search: value || undefined },
+                            {
+                                preserveState: true,
+                                preserveScroll: true,
+                                replace: true,
+                            },
+                        );
+                    }}
+                />
 
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-lg">
                     <div className="inline-block min-w-full align-middle">

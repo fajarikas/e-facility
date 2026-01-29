@@ -12,14 +12,33 @@ class RoomController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $room = Room::with('building')->latest()->paginate(10);
+        $search = trim((string) $request->query('search', ''));
+
+        $room = Room::query()
+            ->with('building')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('building', function ($query) use ($search): void {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('address', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
         $buildings = Building::orderBy('name')->get();
 
         return Inertia::render('rooms/index', [
             'data' => $room,
-            'buildings' => $buildings
+            'buildings' => $buildings,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -36,13 +55,13 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData =  $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|integer',
             'description' => 'required|string',
             'building_id' => 'required|integer|exists:buildings,id',
             'images' => 'required|array|max:4',
-            'images.*' => 'required|file|image|max:2048'
+            'images.*' => 'required|file|image|max:2048',
         ]);
 
         $imagePaths = [];
@@ -56,7 +75,7 @@ class RoomController extends Controller
 
         return redirect()->route('rooms')->with([
             'success' => 'Rooms created',
-            'data' => $room
+            'data' => $room,
         ]);
     }
 

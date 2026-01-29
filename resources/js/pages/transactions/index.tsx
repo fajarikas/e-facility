@@ -1,7 +1,9 @@
 import Modal from '@/components/modals';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import PaginationLinks from '@/components/ui/pagination-link';
 import AppLayout from '@/layouts/app-layout';
+import { transactions } from '@/routes';
 import { BreadcrumbItem, User } from '@/types';
 import { RoomData } from '@/types/rooms';
 import {
@@ -11,7 +13,14 @@ import {
     TransactionData,
 } from '@/types/transactions';
 import { Head, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+    Building2,
+    Home,
+    MapPin,
+    Phone,
+    User as UserIcon,
+} from 'lucide-react';
 import { IoMdEye, IoMdTrash } from 'react-icons/io';
 import { MdCheckCircle } from 'react-icons/md';
 import Toastify from 'toastify-js';
@@ -30,6 +39,15 @@ type Props = {
     rooms: RoomData[];
     users: User[];
     calendar: TransactionCalendarData;
+    filters: {
+        search?: string | null;
+        status?: string | null;
+        customer_name?: string | null;
+        customer_phone?: string | null;
+        customer_address?: string | null;
+        room?: string | null;
+        building?: string | null;
+    };
 };
 
 const dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
@@ -68,7 +86,7 @@ function labelDate(dateKey: string): string {
     });
 }
 
-const TransactionsIndex = ({ data, rooms, users, calendar }: Props) => {
+const TransactionsIndex = ({ data, rooms, users, calendar, filters }: Props) => {
     const transactionData = data.data;
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -80,6 +98,62 @@ const TransactionsIndex = ({ data, rooms, users, calendar }: Props) => {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
     const [isCalendarNavigating, setIsCalendarNavigating] = useState(false);
+    const [searchValue, setSearchValue] = useState(filters.search ?? '');
+    const [statusValue, setStatusValue] = useState(filters.status ?? '');
+    const [customerNameValue, setCustomerNameValue] = useState(
+        filters.customer_name ?? '',
+    );
+    const [customerPhoneValue, setCustomerPhoneValue] = useState(
+        filters.customer_phone ?? '',
+    );
+    const [customerAddressValue, setCustomerAddressValue] = useState(
+        filters.customer_address ?? '',
+    );
+    const [roomValue, setRoomValue] = useState(filters.room ?? '');
+    const [buildingValue, setBuildingValue] = useState(filters.building ?? '');
+
+    useEffect(() => {
+        setSearchValue(filters.search ?? '');
+    }, [filters.search]);
+
+    useEffect(() => {
+        setStatusValue(filters.status ?? '');
+    }, [filters.status]);
+    useEffect(() => {
+        setCustomerNameValue(filters.customer_name ?? '');
+    }, [filters.customer_name]);
+    useEffect(() => {
+        setCustomerPhoneValue(filters.customer_phone ?? '');
+    }, [filters.customer_phone]);
+    useEffect(() => {
+        setCustomerAddressValue(filters.customer_address ?? '');
+    }, [filters.customer_address]);
+    useEffect(() => {
+        setRoomValue(filters.room ?? '');
+    }, [filters.room]);
+    useEffect(() => {
+        setBuildingValue(filters.building ?? '');
+    }, [filters.building]);
+
+    const submitFilters = () => {
+        router.get(
+            transactions().url,
+            {
+                search: searchValue || undefined,
+                status: statusValue || undefined,
+                customer_name: customerNameValue || undefined,
+                customer_phone: customerPhoneValue || undefined,
+                customer_address: customerAddressValue || undefined,
+                room: roomValue || undefined,
+                building: buildingValue || undefined,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
 
     const { year: calendarYear, monthIndex: calendarMonthIndex } = useMemo(
         () => parseMonth(calendar.month),
@@ -114,6 +188,22 @@ const TransactionsIndex = ({ data, rooms, users, calendar }: Props) => {
             };
         });
     }, [calendar.counts_by_date, calendarMonthIndex, calendarYear]);
+
+    const roomOptions = useMemo(() => {
+        return rooms
+            .map((room) => room.name)
+            .filter((name): name is string => Boolean(name))
+            .filter((value, index, array) => array.indexOf(value) === index)
+            .sort((a, b) => a.localeCompare(b));
+    }, [rooms]);
+
+    const buildingOptions = useMemo(() => {
+        const names = rooms
+            .map((room) => room.building?.name)
+            .filter((name): name is string => Boolean(name));
+
+        return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+    }, [rooms]);
 
     const openDay = (dateKey: string) => {
         setSelectedDate(dateKey);
@@ -242,6 +332,112 @@ const TransactionsIndex = ({ data, rooms, users, calendar }: Props) => {
                         </Button>
                     </div>
                 </div>
+
+                <form
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        submitFilters();
+                    }}
+                    className="flex w-full flex-col gap-3"
+                >
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+                        <div className="relative">
+                            <UserIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={customerNameValue}
+                                onChange={(event) =>
+                                    setCustomerNameValue(event.target.value)
+                                }
+                                placeholder="Pemesan"
+                                className="h-10 pl-9"
+                            />
+                        </div>
+                        <div className="relative">
+                            <Phone className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={customerPhoneValue}
+                                onChange={(event) =>
+                                    setCustomerPhoneValue(event.target.value)
+                                }
+                                placeholder="No HP"
+                                className="h-10 pl-9"
+                            />
+                        </div>
+                        <div className="relative">
+                            <MapPin className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={customerAddressValue}
+                                onChange={(event) =>
+                                    setCustomerAddressValue(event.target.value)
+                                }
+                                placeholder="Alamat"
+                                className="h-10 pl-9"
+                            />
+                        </div>
+                        <div className="relative">
+                            <Home className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={roomValue}
+                                onChange={(event) =>
+                                    setRoomValue(event.target.value)
+                                }
+                                list="room-options"
+                                placeholder="Ruangan"
+                                className="h-10 pl-9"
+                            />
+                            <datalist id="room-options">
+                                {roomOptions.map((name) => (
+                                    <option key={name} value={name} />
+                                ))}
+                            </datalist>
+                        </div>
+                        <div className="relative">
+                            <Building2 className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={buildingValue}
+                                onChange={(event) =>
+                                    setBuildingValue(event.target.value)
+                                }
+                                list="building-options"
+                                placeholder="Bangunan"
+                                className="h-10 pl-9"
+                            />
+                            <datalist id="building-options">
+                                {buildingOptions.map((name) => (
+                                    <option key={name} value={name} />
+                                ))}
+                            </datalist>
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <Input
+                            value={searchValue}
+                            onChange={(event) =>
+                                setSearchValue(event.target.value)
+                            }
+                            placeholder="Cari transaksi..."
+                            className="h-10 sm:flex-1"
+                        />
+                        <select
+                            value={statusValue}
+                            onChange={(event) =>
+                                setStatusValue(event.target.value)
+                            }
+                            className="h-10 rounded-md border border-input bg-background px-3 text-sm text-gray-700 shadow-xs focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                        >
+                            <option value="">Semua Status</option>
+                            <option value="pending_payment">
+                                Menunggu Pembayaran
+                            </option>
+                            <option value="booked">Disetujui</option>
+                            <option value="cancelled">Dibatalkan</option>
+                            <option value="expired">Kadaluarsa</option>
+                        </select>
+                        <Button type="submit" className="bg-neutral-900 text-white hover:bg-neutral-800" size={"sm"}>
+                            Cari
+                        </Button>
+                    </div>
+                </form>
 
                 {isCalendarOpen && (
                     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-lg">

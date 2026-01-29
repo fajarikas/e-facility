@@ -13,17 +13,32 @@ class BuildingController extends Controller
      */
     public function index(Request $request)
     {
-        $buildings = Building::latest()->paginate(10);
+        $search = trim((string) $request->query('search', ''));
+
+        $buildings = Building::query()
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('address', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
         $buildingId = $request->get('buildingId');
         $selectedBuilding = null;
 
         if ($buildingId) {
             $selectedBuilding = Building::find($buildingId);
         }
+
         return Inertia::render('buildings/index', [
             'data' => $buildings,
             'selectedBuilding' => $selectedBuilding,
-            'buildingDetail' => $buildingId
+            'buildingDetail' => $buildingId,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -42,7 +57,7 @@ class BuildingController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|max:255'
+            'address' => 'required|max:255',
         ]);
 
         $building = Building::create($validated);
@@ -63,7 +78,7 @@ class BuildingController extends Controller
         }
 
         return Inertia::render('building/show', [
-            'buildingDetail' => $building
+            'buildingDetail' => $building,
         ]);
     }
 
@@ -82,10 +97,11 @@ class BuildingController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'address' => 'required|string|max:255'
+            'address' => 'required|string|max:255',
         ]);
 
         $building->update($validated);
+
         return redirect()->route('buildings')->with('success', 'Data berhasil diupdate');
     }
 

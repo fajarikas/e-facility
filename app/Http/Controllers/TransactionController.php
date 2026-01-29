@@ -17,20 +17,75 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         Transaction::expirePending();
 
         $requestedCalendarMonth = request()->query('calendar_month');
+        $search = trim((string) $request->query('search', ''));
+        $status = trim((string) $request->query('status', ''));
+        $customerName = trim((string) $request->query('customer_name', ''));
+        $customerPhone = trim((string) $request->query('customer_phone', ''));
+        $customerAddress = trim((string) $request->query('customer_address', ''));
+        $roomName = trim((string) $request->query('room', ''));
+        $buildingName = trim((string) $request->query('building', ''));
 
         $calendarMonthDate = now()->startOfMonth();
         if (is_string($requestedCalendarMonth) && preg_match('/^\d{4}-\d{2}$/', $requestedCalendarMonth) === 1) {
             $calendarMonthDate = Carbon::createFromFormat('Y-m', $requestedCalendarMonth)->startOfMonth();
         }
 
-        $transactions = Transaction::with(['room.building', 'details.user', 'dataMaster', 'paymentMethod'])
+        $transactions = Transaction::query()
+            ->with(['room.building', 'details.user', 'dataMaster', 'paymentMethod'])
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('customer_name', 'like', "%{$search}%")
+                        ->orWhere('customer_phone', 'like', "%{$search}%")
+                        ->orWhere('customer_address', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhereHas('room', function ($query) use ($search): void {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhereHas('building', function ($query) use ($search): void {
+                                    $query->where('name', 'like', "%{$search}%");
+                                });
+                        })
+                        ->orWhereHas('details.user', function ($query) use ($search): void {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($customerName !== '', function ($query) use ($customerName): void {
+                $query->where(function ($query) use ($customerName): void {
+                    $query->where('customer_name', 'like', "%{$customerName}%")
+                        ->orWhereHas('details.user', function ($query) use ($customerName): void {
+                            $query->where('name', 'like', "%{$customerName}%")
+                                ->orWhere('email', 'like', "%{$customerName}%");
+                        });
+                });
+            })
+            ->when($customerPhone !== '', function ($query) use ($customerPhone): void {
+                $query->where('customer_phone', 'like', "%{$customerPhone}%");
+            })
+            ->when($customerAddress !== '', function ($query) use ($customerAddress): void {
+                $query->where('customer_address', 'like', "%{$customerAddress}%");
+            })
+            ->when($roomName !== '', function ($query) use ($roomName): void {
+                $query->whereHas('room', function ($query) use ($roomName): void {
+                    $query->where('name', 'like', "%{$roomName}%");
+                });
+            })
+            ->when($buildingName !== '', function ($query) use ($buildingName): void {
+                $query->whereHas('room.building', function ($query) use ($buildingName): void {
+                    $query->where('name', 'like', "%{$buildingName}%");
+                });
+            })
+            ->when($status !== '', function ($query) use ($status): void {
+                $query->where('status', $status);
+            })
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
         $rooms = Room::with('building')->orderBy('name')->get();
         $users = User::orderBy('name')->get(['id', 'name', 'email']);
 
@@ -39,6 +94,15 @@ class TransactionController extends Controller
             'rooms' => $rooms,
             'users' => $users,
             'calendar' => TransactionCalendar::forMonth($calendarMonthDate),
+            'filters' => [
+                'search' => $search,
+                'status' => $status,
+                'customer_name' => $customerName,
+                'customer_phone' => $customerPhone,
+                'customer_address' => $customerAddress,
+                'room' => $roomName,
+                'building' => $buildingName,
+            ],
         ]);
     }
 

@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
+import SearchFilter from '@/components/search/SearchFilter';
 import PaginationLinks from '@/components/ui/pagination-link';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { PaginatedUserData, UserData } from '@/types/users';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 
@@ -17,9 +18,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 type Props = {
     data: PaginatedUserData;
+    filters: { search?: string | null };
 };
 
-const UserManagementIndex = ({ data }: Props) => {
+const UserManagementIndex = ({ data, filters }: Props) => {
     const userData = data.data;
     const [savingId, setSavingId] = useState<number | null>(null);
     const [roleDrafts, setRoleDrafts] = useState<Record<number, UserData['role']>>(
@@ -29,6 +31,11 @@ const UserManagementIndex = ({ data }: Props) => {
                 return acc;
             }, {} as Record<number, UserData['role']>),
     );
+    const [searchValue, setSearchValue] = useState(filters.search ?? '');
+
+    useEffect(() => {
+        setSearchValue(filters.search ?? '');
+    }, [filters.search]);
 
     const handleRoleChange = (id: number, role: UserData['role']) => {
         setRoleDrafts((prev) => ({
@@ -75,6 +82,23 @@ const UserManagementIndex = ({ data }: Props) => {
                         Manajemen User
                     </h1>
                 </div>
+
+                <SearchFilter
+                    placeholder="Cari user..."
+                    value={searchValue}
+                    onChange={setSearchValue}
+                    onSubmit={(value) => {
+                        router.get(
+                            '/admin/users',
+                            { search: value || undefined },
+                            {
+                                preserveState: true,
+                                preserveScroll: true,
+                                replace: true,
+                            },
+                        );
+                    }}
+                />
 
                 <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-lg">
                     <div className="inline-block min-w-full align-middle">
