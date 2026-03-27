@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Room;
-use App\Models\UserRoomLike;
 use App\Models\DataMaster;
 use App\Models\PaymentMethod;
+use App\Models\Room;
 use App\Models\Transaction;
+use App\Models\UserRoomLike;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -119,6 +119,8 @@ class FacilityController extends Controller
 
     public function show(Request $request, Room $room)
     {
+        Transaction::expirePending();
+
         $room->load('building');
 
         $isLiked = UserRoomLike::query()
@@ -136,11 +138,49 @@ class FacilityController extends Controller
                 ->get()
             : collect();
 
+        $today = now()->startOfDay();
+
+        $blockedTransactions = $room->transactions()
+            ->whereIn('status', ['pending_payment', 'booked'])
+            ->where(function ($query) {
+                $query->where('status', 'booked')
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->where('status', 'pending_payment')
+                            ->where(function ($pendingQuery) {
+                                $pendingQuery->whereNull('expires_at')
+                                    ->orWhere('expires_at', '>', now());
+                            });
+                    });
+            })
+            ->whereDate('check_out_date', '>=', $today->toDateString())
+            ->get(['check_in_date', 'check_out_date']);
+
+        $blockedDates = [];
+        foreach ($blockedTransactions as $transaction) {
+            $start = \Carbon\Carbon::createFromFormat('Y-m-d', (string) $transaction->check_in_date)->startOfDay();
+            $end = \Carbon\Carbon::createFromFormat('Y-m-d', (string) $transaction->check_out_date)->startOfDay();
+
+            if ($end->lt($today)) {
+                continue;
+            }
+
+            if ($start->lt($today)) {
+                $start = $today->copy();
+            }
+
+            $cursor = $start->copy();
+            while ($cursor->lte($end)) {
+                $blockedDates[] = $cursor->toDateString();
+                $cursor->addDay();
+            }
+        }
+
         return Inertia::render('facilities/show', [
             'room' => $room,
             'isLiked' => $isLiked,
             'dataMaster' => $dataMaster,
             'paymentMethods' => $paymentMethods,
+            'blockedDates' => array_values(array_unique($blockedDates)),
         ]);
     }
 }

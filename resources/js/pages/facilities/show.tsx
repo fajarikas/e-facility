@@ -15,6 +15,7 @@ type Props = {
     isLiked: boolean;
     dataMaster: DataMaster | null;
     paymentMethods: PaymentMethod[];
+    blockedDates: string[];
 };
 
 export default function FacilityShow({
@@ -22,6 +23,7 @@ export default function FacilityShow({
     isLiked,
     dataMaster,
     paymentMethods,
+    blockedDates,
 }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Fasilitas', href: '/facilities' },
@@ -37,6 +39,38 @@ export default function FacilityShow({
     const [customerPhone, setCustomerPhone] = useState('');
     const [customerAddress, setCustomerAddress] = useState('');
     const [paymentMethodId, setPaymentMethodId] = useState<string>('');
+
+    const today = useMemo(
+        () => new Date().toLocaleDateString('en-CA'),
+        [],
+    );
+    const blockedDatesSet = useMemo(
+        () => new Set(blockedDates ?? []),
+        [blockedDates],
+    );
+
+    const formatDate = (date: Date) => date.toLocaleDateString('en-CA');
+
+    const isBlockedDate = (date: string) => blockedDatesSet.has(date);
+
+    const isRangeBlocked = (startDate: string, endDate: string) => {
+        if (!startDate || !endDate) return false;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()))
+            return false;
+        if (end < start) return false;
+
+        const cursor = new Date(start);
+        while (cursor <= end) {
+            if (blockedDatesSet.has(formatDate(cursor))) {
+                return true;
+            }
+            cursor.setDate(cursor.getDate() + 1);
+        }
+
+        return false;
+    };
 
     const { days, totalHarga } = useMemo(() => {
         if (!checkInDate || !checkOutDate) return { days: 0, totalHarga: 0 };
@@ -55,6 +89,19 @@ export default function FacilityShow({
 
     const submitOrder = (e: FormEvent) => {
         e.preventDefault();
+        if (isRangeBlocked(checkInDate, checkOutDate)) {
+            Toastify({
+                text: 'Tanggal yang dipilih sudah dibooking atau masih pending.',
+                duration: 4000,
+                close: true,
+                gravity: 'top',
+                position: 'left',
+                style: {
+                    background: '#B91C1C',
+                },
+            }).showToast();
+            return;
+        }
         router.post(
             `/facilities/${room.id}/order`,
             {
@@ -260,7 +307,45 @@ export default function FacilityShow({
                             <input
                                 type="date"
                                 value={checkInDate}
-                                onChange={(e) => setCheckInDate(e.target.value)}
+                                min={today}
+                                onChange={(e) => {
+                                    const nextValue = e.target.value;
+                                    if (!nextValue) {
+                                        setCheckInDate('');
+                                        return;
+                                    }
+                                    if (isBlockedDate(nextValue)) {
+                                        Toastify({
+                                            text: 'Tanggal tersebut sudah dibooking atau masih pending.',
+                                            duration: 4000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'left',
+                                            style: {
+                                                background: '#B91C1C',
+                                            },
+                                        }).showToast();
+                                        setCheckInDate('');
+                                        return;
+                                    }
+                                    setCheckInDate(nextValue);
+                                    if (
+                                        checkOutDate &&
+                                        isRangeBlocked(nextValue, checkOutDate)
+                                    ) {
+                                        Toastify({
+                                            text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
+                                            duration: 4000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'left',
+                                            style: {
+                                                background: '#B91C1C',
+                                            },
+                                        }).showToast();
+                                        setCheckOutDate('');
+                                    }
+                                }}
                                 className="h-12 w-full rounded-md border border-gray-200 px-3 text-sm"
                             />
                             {errors?.check_in_date && (
@@ -277,9 +362,46 @@ export default function FacilityShow({
                             <input
                                 type="date"
                                 value={checkOutDate}
-                                onChange={(e) =>
-                                    setCheckOutDate(e.target.value)
-                                }
+                                min={checkInDate || today}
+                                onChange={(e) => {
+                                    const nextValue = e.target.value;
+                                    if (!nextValue) {
+                                        setCheckOutDate('');
+                                        return;
+                                    }
+                                    if (isBlockedDate(nextValue)) {
+                                        Toastify({
+                                            text: 'Tanggal tersebut sudah dibooking atau masih pending.',
+                                            duration: 4000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'left',
+                                            style: {
+                                                background: '#B91C1C',
+                                            },
+                                        }).showToast();
+                                        setCheckOutDate('');
+                                        return;
+                                    }
+                                    if (
+                                        checkInDate &&
+                                        isRangeBlocked(checkInDate, nextValue)
+                                    ) {
+                                        Toastify({
+                                            text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
+                                            duration: 4000,
+                                            close: true,
+                                            gravity: 'top',
+                                            position: 'left',
+                                            style: {
+                                                background: '#B91C1C',
+                                            },
+                                        }).showToast();
+                                        setCheckOutDate('');
+                                        return;
+                                    }
+                                    setCheckOutDate(nextValue);
+                                }}
                                 className="h-12 w-full rounded-md border border-gray-200 px-3 text-sm"
                             />
                             {errors?.check_out_date && (
@@ -317,6 +439,7 @@ export default function FacilityShow({
                                     !checkInDate ||
                                     !checkOutDate ||
                                     days <= 0 ||
+                                    isRangeBlocked(checkInDate, checkOutDate) ||
                                     (paymentMethods?.length ? !paymentMethodId : false)
                                 }
                             >
