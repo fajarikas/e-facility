@@ -5,8 +5,10 @@ import { BreadcrumbItem } from '@/types';
 import { DataMaster, PaymentMethod } from '@/types/data-master';
 import { RoomData } from '@/types/rooms';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Heart } from 'lucide-react';
+import { Calendar, Heart } from 'lucide-react';
 import { FormEvent, useMemo, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 
@@ -40,10 +42,7 @@ export default function FacilityShow({
     const [customerAddress, setCustomerAddress] = useState('');
     const [paymentMethodId, setPaymentMethodId] = useState<string>('');
 
-    const today = useMemo(
-        () => new Date().toLocaleDateString('en-CA'),
-        [],
-    );
+    const today = useMemo(() => new Date().toLocaleDateString('en-CA'), []);
     const blockedDatesSet = useMemo(
         () => new Set(blockedDates ?? []),
         [blockedDates],
@@ -85,7 +84,8 @@ export default function FacilityShow({
         const d = diffDays + 1;
         return { days: d, totalHarga: d * Number(room.price || 0) };
     }, [checkInDate, checkOutDate, room.price]);
-    const rupiah = (amount: number) => `Rp${new Intl.NumberFormat('id-ID').format(amount)}`;
+    const rupiah = (amount: number) =>
+        `Rp${new Intl.NumberFormat('id-ID').format(amount)}`;
 
     const submitOrder = (e: FormEvent) => {
         e.preventDefault();
@@ -110,7 +110,9 @@ export default function FacilityShow({
                 customer_address: customerAddress,
                 check_in_date: checkInDate,
                 check_out_date: checkOutDate,
-                payment_method_id: paymentMethodId ? Number(paymentMethodId) : undefined,
+                payment_method_id: paymentMethodId
+                    ? Number(paymentMethodId)
+                    : undefined,
             },
             {
                 preserveScroll: true,
@@ -145,7 +147,10 @@ export default function FacilityShow({
                                 router.post(
                                     `/facilities/${room.id}/like`,
                                     {},
-                                    { preserveScroll: true, preserveState: true },
+                                    {
+                                        preserveScroll: true,
+                                        preserveState: true,
+                                    },
                                 )
                             }
                         >
@@ -190,10 +195,9 @@ export default function FacilityShow({
                                     </span>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">
-                                        Info:
-                                    </span>{' '}
-                                    Silakan cek deskripsi untuk detail fasilitas.
+                                    <span className="text-gray-500">Info:</span>{' '}
+                                    Silakan cek deskripsi untuk detail
+                                    fasilitas.
                                 </div>
                             </div>
                         </div>
@@ -281,7 +285,9 @@ export default function FacilityShow({
                             </label>
                             <select
                                 value={paymentMethodId}
-                                onChange={(e) => setPaymentMethodId(e.target.value)}
+                                onChange={(e) =>
+                                    setPaymentMethodId(e.target.value)
+                                }
                                 className="h-12 w-full rounded-md border border-gray-200 bg-white px-3 text-sm"
                             >
                                 <option value="">
@@ -289,7 +295,8 @@ export default function FacilityShow({
                                 </option>
                                 {paymentMethods?.map((m) => (
                                     <option key={m.id} value={String(m.id)}>
-                                        {m.type === 'va' ? 'VA' : 'Transfer'} - {m.bank_name} ({m.account_number})
+                                        {m.type === 'va' ? 'VA' : 'Transfer'} -{' '}
+                                        {m.bank_name} ({m.account_number})
                                     </option>
                                 ))}
                             </select>
@@ -304,50 +311,86 @@ export default function FacilityShow({
                             <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
                                 Dari Tanggal
                             </label>
-                            <input
-                                type="date"
-                                value={checkInDate}
-                                min={today}
-                                onChange={(e) => {
-                                    const nextValue = e.target.value;
-                                    if (!nextValue) {
-                                        setCheckInDate('');
-                                        return;
+
+                            <div className="relative">
+                                <DatePicker
+                                    selected={
+                                        checkInDate
+                                            ? new Date(checkInDate)
+                                            : null
                                     }
-                                    if (isBlockedDate(nextValue)) {
-                                        Toastify({
-                                            text: 'Tanggal tersebut sudah dibooking atau masih pending.',
-                                            duration: 4000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'left',
-                                            style: {
-                                                background: '#B91C1C',
-                                            },
-                                        }).showToast();
-                                        setCheckInDate('');
-                                        return;
-                                    }
-                                    setCheckInDate(nextValue);
-                                    if (
-                                        checkOutDate &&
-                                        isRangeBlocked(nextValue, checkOutDate)
-                                    ) {
-                                        Toastify({
-                                            text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
-                                            duration: 4000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'left',
-                                            style: {
-                                                background: '#B91C1C',
-                                            },
-                                        }).showToast();
-                                        setCheckOutDate('');
-                                    }
-                                }}
-                                className="h-12 w-full rounded-md border border-gray-200 px-3 text-sm"
-                            />
+                                    onChange={(date: Date | null) => {
+                                        if (!date) {
+                                            setCheckInDate('');
+                                            return;
+                                        }
+
+                                        const formatted =
+                                            date.toLocaleDateString('sv-SE');
+
+                                        if (isBlockedDate(formatted)) {
+                                            Toastify({
+                                                text: 'Tanggal tersebut sudah dibooking atau masih pending.',
+                                                duration: 4000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#B91C1C',
+                                                },
+                                            }).showToast();
+                                            return;
+                                        }
+
+                                        setCheckInDate(formatted);
+
+                                        if (
+                                            checkOutDate &&
+                                            isRangeBlocked(
+                                                formatted,
+                                                checkOutDate,
+                                            )
+                                        ) {
+                                            Toastify({
+                                                text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
+                                                duration: 4000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#B91C1C',
+                                                },
+                                            }).showToast();
+                                            setCheckOutDate('');
+                                        }
+                                    }}
+                                    minDate={new Date()}
+                                    filterDate={(date) => {
+                                        const formatted =
+                                            date.toLocaleDateString('sv-SE');
+                                        return !isBlockedDate(formatted);
+                                    }}
+                                    dayClassName={(date) => {
+                                        const formatted =
+                                            date.toLocaleDateString('sv-SE');
+
+                                        return isBlockedDate(formatted)
+                                            ? 'bg-red-400 text-red-600 cursor-not-allowed'
+                                            : '';
+                                    }}
+                                    placeholderText="Pilih tanggal"
+                                    dateFormat="yyyy-MM-dd"
+                                    // 🔥 padding kiri ditambah biar ga ketiban icon
+                                    className="h-12 w-full rounded-md border border-gray-200 pr-3 pl-10 text-sm"
+                                />
+
+                                {/* ICON */}
+                                <Calendar
+                                    size={18}
+                                    className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
+                                />
+                            </div>
+
                             {errors?.check_in_date && (
                                 <div className="mt-1 text-xs text-red-600">
                                     {errors.check_in_date}
@@ -359,51 +402,90 @@ export default function FacilityShow({
                             <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
                                 Sampai Tanggal
                             </label>
-                            <input
-                                type="date"
-                                value={checkOutDate}
-                                min={checkInDate || today}
-                                onChange={(e) => {
-                                    const nextValue = e.target.value;
-                                    if (!nextValue) {
-                                        setCheckOutDate('');
-                                        return;
+
+                            <div className="relative">
+                                <DatePicker
+                                    selected={
+                                        checkOutDate
+                                            ? new Date(checkOutDate)
+                                            : null
                                     }
-                                    if (isBlockedDate(nextValue)) {
-                                        Toastify({
-                                            text: 'Tanggal tersebut sudah dibooking atau masih pending.',
-                                            duration: 4000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'left',
-                                            style: {
-                                                background: '#B91C1C',
-                                            },
-                                        }).showToast();
-                                        setCheckOutDate('');
-                                        return;
+                                    onChange={(date: Date | null) => {
+                                        if (!date) {
+                                            setCheckOutDate('');
+                                            return;
+                                        }
+
+                                        const formatted =
+                                            date.toLocaleDateString('sv-SE');
+
+                                        if (isBlockedDate(formatted)) {
+                                            Toastify({
+                                                text: 'Tanggal tersebut sudah dibooking atau masih pending.',
+                                                duration: 4000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#B91C1C',
+                                                },
+                                            }).showToast();
+                                            return;
+                                        }
+
+                                        if (
+                                            checkInDate &&
+                                            isRangeBlocked(
+                                                checkInDate,
+                                                formatted,
+                                            )
+                                        ) {
+                                            Toastify({
+                                                text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
+                                                duration: 4000,
+                                                close: true,
+                                                gravity: 'top',
+                                                position: 'left',
+                                                style: {
+                                                    background: '#B91C1C',
+                                                },
+                                            }).showToast();
+                                            return;
+                                        }
+
+                                        setCheckOutDate(formatted);
+                                    }}
+                                    minDate={
+                                        checkInDate
+                                            ? new Date(checkInDate)
+                                            : new Date()
                                     }
-                                    if (
-                                        checkInDate &&
-                                        isRangeBlocked(checkInDate, nextValue)
-                                    ) {
-                                        Toastify({
-                                            text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
-                                            duration: 4000,
-                                            close: true,
-                                            gravity: 'top',
-                                            position: 'left',
-                                            style: {
-                                                background: '#B91C1C',
-                                            },
-                                        }).showToast();
-                                        setCheckOutDate('');
-                                        return;
-                                    }
-                                    setCheckOutDate(nextValue);
-                                }}
-                                className="h-12 w-full rounded-md border border-gray-200 px-3 text-sm"
-                            />
+                                    filterDate={(date) => {
+                                        const formatted =
+                                            date.toLocaleDateString('sv-SE');
+                                        return !isBlockedDate(formatted);
+                                    }}
+                                    dayClassName={(date) => {
+                                        const formatted =
+                                            date.toLocaleDateString('sv-SE');
+
+                                        return isBlockedDate(formatted)
+                                            ? 'bg-red-400 text-red-600 cursor-not-allowed'
+                                            : '';
+                                    }}
+                                    placeholderText="Pilih tanggal"
+                                    dateFormat="yyyy-MM-dd"
+                                    // 🔥 padding kiri biar ga ketabrak icon
+                                    className="h-12 w-full rounded-md border border-gray-200 pr-3 pl-10 text-sm"
+                                />
+
+                                {/* ICON */}
+                                <Calendar
+                                    size={18}
+                                    className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
+                                />
+                            </div>
+
                             {errors?.check_out_date && (
                                 <div className="mt-1 text-xs text-red-600">
                                     {errors.check_out_date}
@@ -440,7 +522,9 @@ export default function FacilityShow({
                                     !checkOutDate ||
                                     days <= 0 ||
                                     isRangeBlocked(checkInDate, checkOutDate) ||
-                                    (paymentMethods?.length ? !paymentMethodId : false)
+                                    (paymentMethods?.length
+                                        ? !paymentMethodId
+                                        : false)
                                 }
                             >
                                 Buat Pesanan
@@ -456,12 +540,11 @@ export default function FacilityShow({
 
                     {dataMaster && (
                         <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-                            <div className="font-semibold">
-                                Info Pembayaran
-                            </div>
+                            <div className="font-semibold">Info Pembayaran</div>
                             {paymentMethods?.length ? (
                                 <div className="mt-1 text-blue-800">
-                                    Pilih metode pembayaran saat membuat pesanan.
+                                    Pilih metode pembayaran saat membuat
+                                    pesanan.
                                 </div>
                             ) : (
                                 <div className="mt-1">
@@ -475,7 +558,8 @@ export default function FacilityShow({
                                 Kontak: {dataMaster.name} — {dataMaster.contact}
                             </div>
                             <div className="mt-2 text-xs text-blue-800">
-                                Setelah pesanan dibuat, admin akan konfirmasi pembayaran dan menyetujui booking.
+                                Setelah pesanan dibuat, admin akan konfirmasi
+                                pembayaran dan menyetujui booking.
                             </div>
                         </div>
                     )}
