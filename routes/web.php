@@ -25,6 +25,8 @@ use Laravel\Fortify\Features;
 //     ]);
 // })->name('home');
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
+Route::get('facilities', [FacilityController::class, 'index'])->name('facilities.index');
+Route::get('facilities/{room}', [FacilityController::class, 'show'])->name('facilities.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
@@ -32,9 +34,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('facilities', [FacilityController::class, 'index'])->name('facilities.index');
     Route::get('facilities/bookmarks', [FacilityController::class, 'bookmarks'])->name('facilities.bookmarks');
-    Route::get('facilities/{room}', [FacilityController::class, 'show'])->name('facilities.show');
     Route::post('facilities/{room}/like', [FacilityLikeController::class, 'toggle'])->name('facilities.like');
     Route::post('facilities/{room}/order', [FacilityOrderController::class, 'store'])->name('facilities.order');
 
@@ -82,4 +82,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

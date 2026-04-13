@@ -91,6 +91,13 @@ export function AppSidebar() {
     const navItems = canAccessBackoffice ? mainNavItems : userNavItems;
     const homeHref = canAccessBackoffice ? dashboard() : '/facilities';
 
+    const filteredNavItems = navItems.filter((item) => {
+        if (!auth.user) {
+            return !['Transaksi', 'Bookmark'].includes(item.title);
+        }
+        return true;
+    });
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -106,22 +113,25 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={navItems} />
+                <NavMain items={filteredNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
                 {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
-                <NavUser />
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        {/* <SidebarMenuButton asChild>
-                            <Link href={logout()} as="button">
-                                <LogOut className="mr-2 size-4" />
-                                Logout
-                            </Link>
-                        </SidebarMenuButton> */}
-                    </SidebarMenuItem>
-                </SidebarMenu>
+                {auth.user ? (
+                    <NavUser />
+                ) : (
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                                <Link href="/login">
+                                    <LayoutGrid className="mr-2 size-4" />
+                                    Login
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                )}
             </SidebarFooter>
         </Sidebar>
     );

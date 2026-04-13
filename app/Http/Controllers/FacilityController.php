@@ -70,10 +70,16 @@ class FacilityController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $likedRoomIds = UserRoomLike::query()
-            ->where('user_id', $request->user()->id)
-            ->pluck('room_id')
-            ->values();
+        $user = $request->user();
+
+        $likedRoomIds = collect(); // default kosong
+
+        if ($user) {
+            $likedRoomIds = UserRoomLike::query()
+                ->where('user_id', $user->id)
+                ->pluck('room_id')
+                ->values();
+        }
 
         $availabilityByRoomId = [];
         foreach ($rooms->items() as $room) {
@@ -123,19 +129,23 @@ class FacilityController extends Controller
 
         $room->load('building');
 
-        $isLiked = UserRoomLike::query()
-            ->where('user_id', $request->user()->id)
-            ->where('room_id', $room->id)
-            ->exists();
+        $isLiked = false;
+
+        if ($request->user()) {
+            $isLiked = UserRoomLike::query()
+                ->where('user_id', $request->user()->id)
+                ->where('room_id', $room->id)
+                ->exists();
+        }
 
         $dataMaster = DataMaster::query()->latest()->first();
         $paymentMethods = $dataMaster
             ? PaymentMethod::query()
-                ->where('data_master_id', $dataMaster->id)
-                ->where('is_active', true)
-                ->orderBy('type')
-                ->orderBy('bank_name')
-                ->get()
+            ->where('data_master_id', $dataMaster->id)
+            ->where('is_active', true)
+            ->orderBy('type')
+            ->orderBy('bank_name')
+            ->get()
             : collect();
 
         $today = now()->startOfDay();

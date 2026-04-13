@@ -28,8 +28,8 @@ const Popular = ({ rooms }: Props) => {
                     </h2>
 
                     <a
-                        href="#"
                         className="text-sm font-semibold text-gray-700 hover:text-gray-900"
+                        href="facilities"
                     >
                         See More
                     </a>
