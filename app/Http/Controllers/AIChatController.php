@@ -9,17 +9,13 @@ use Carbon\Carbon;
 
 class AIChatController extends Controller
 {
-    /**
-     * Handle the chat request using Smart FAQ logic with Availability Check.
-     */
+
     public function __invoke(Request $request)
     {
         $message = strtolower($request->input('message', ''));
 
-        // 1. Ambil data dari database untuk pencocokan dinamis
         $rooms = Room::with('building')->get();
 
-        // 2. Deteksi Tanggal dan Nama Gedung (Pengecekan Ketersediaan)
         $targetDate = $this->parseIndonesianDate($message);
         $foundRoom = null;
 
@@ -54,14 +50,12 @@ class AIChatController extends Controller
             }
         }
 
-        // 3. Pengecekan info gedung umum (tanpa tanggal)
         if ($foundRoom) {
             return response()->json([
                 'response' => "Fasilitas {$foundRoom->name} berada di {$foundRoom->building->name}. Harga sewanya adalah Rp " . number_format($foundRoom->price, 0, ',', '.') . "/hari. " . strip_tags($foundRoom->description)
             ]);
         }
 
-        // 4. Logic FAQ Terprogram (Rule-based)
         $faqs = [
             'harga' => 'Tarif sewa gedung di BPMP Babel bervariasi. Mulai dari Rp 220.000 untuk ruang kelas hingga Rp 3.950.000 untuk Aula Baru. Anda bisa melihat daftar lengkapnya di menu "Fasilitas".',
             'tarif' => 'Tarif sewa gedung di BPMP Babel bervariasi. Mulai dari Rp 220.000 untuk ruang kelas hingga Rp 3.950.000 untuk Aula Baru. Anda bisa melihat daftar lengkapnya di menu "Fasilitas".',
@@ -88,9 +82,7 @@ class AIChatController extends Controller
         ]);
     }
 
-    /**
-     * Helper untuk mendeteksi tanggal dalam bahasa Indonesia
-     */
+
     private function parseIndonesianDate($text)
     {
         $months = [
@@ -108,7 +100,6 @@ class AIChatController extends Controller
             'desember' => '12'
         ];
 
-        // Contoh: "20 april" atau "20 april 2026"
         preg_match('/(\d{1,2})\s+([a-zA-Z]+)(\s+\d{4})?/', $text, $matches);
 
         if (count($matches) >= 3) {
@@ -122,7 +113,6 @@ class AIChatController extends Controller
             }
         }
 
-        // Cek kata kunci seperti "besok" atau "hari ini"
         if (str_contains($text, 'besok')) return date('Y-m-d', strtotime('+1 day'));
         if (str_contains($text, 'hari ini')) return date('Y-m-d');
 
