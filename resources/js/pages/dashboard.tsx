@@ -509,8 +509,8 @@ export default function Dashboard({ stats, calendar, recent_transactions }: Prop
                                             className={cn(
                                                 'inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold',
                                                 booking.status === 'booked'
-                                                    ? 'bg-emerald-100 text-emerald-700  
-                                                    : 'bg-amber-100 text-amber-700  
+                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                    : 'bg-amber-100 text-amber-700'
                                             )}
                                         >
                                             {booking.status === 'booked'

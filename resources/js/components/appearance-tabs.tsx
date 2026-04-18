@@ -11,14 +11,16 @@ export default function AppearanceToggleTab({
 
     const tabs: { value: Appearance; icon: LucideIcon; label: string }[] = [
         { value: 'light', icon: Sun, label: 'Light' },
-        { value: 'dark', icon: Moon, label: 'Dark' },
-        { value: 'system', icon: Monitor, label: 'System' },
     ];
+
+    // Since we only support Light mode now, we simplified the tabs but keeping the structure
+    // Or we can just return null if we don't want this tab to show up anymore
+    // But to fix the build error, let's just fix the strings.
 
     return (
         <div
             className={cn(
-                'inline-flex gap-1 rounded-lg bg-neutral-100 p-1 
+                'inline-flex gap-1 rounded-lg bg-neutral-100 p-1',
                 className,
             )}
             {...props}
@@ -30,8 +32,8 @@ export default function AppearanceToggleTab({
                     className={cn(
                         'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
                         appearance === value
-                            ? 'bg-white shadow-xs  
-                            : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black  
+                            ? 'bg-white shadow-xs'
+                            : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black'
                     )}
                 >
                     <Icon className="-ml-1 h-4 w-4" />
