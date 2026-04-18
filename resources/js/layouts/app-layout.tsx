@@ -1,3 +1,4 @@
+import { ChatBot } from '@/components/chat-bot';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
@@ -18,6 +19,7 @@ export default function AppLayout({ children, breadcrumbs, ...props }: AppLayout
             <AppSidebarLayout breadcrumbs={breadcrumbs} {...props}>
                 {children}
                 <div id="modal-root"></div>
+                <ChatBot />
             </AppSidebarLayout>
         );
     }
@@ -26,6 +28,7 @@ export default function AppLayout({ children, breadcrumbs, ...props }: AppLayout
         <AppHeaderLayout breadcrumbs={breadcrumbs} {...props}>
             {children}
             <div id="modal-root"></div>
+            <ChatBot />
         </AppHeaderLayout>
     );
 }

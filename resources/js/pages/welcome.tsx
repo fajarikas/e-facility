@@ -1,5 +1,6 @@
 import AppLogo from '@/components/app-logo';
 import { AppearanceToggle } from '@/components/appearance-toggle';
+import { ChatBot } from '@/components/chat-bot';
 import InputField from '@/components/custom/input';
 import FindYourBest from '@/components/page/main/find-your-best';
 import Popular from '@/components/page/main/popular';
@@ -273,6 +274,7 @@ export default function Welcome({
                 </main>
 
                 <Footer />
+                <ChatBot />
             </div>
         </>
     );

@@ -24,6 +24,10 @@ use Laravel\Fortify\Features;
 //         'canRegister' => Features::enabled(Features::registration()),
 //     ]);
 // })->name('home');
+use App\Http\Controllers\AIChatController;
+
+Route::post('api/chat', AIChatController::class)->name('api.chat');
+
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
 Route::get('facilities', [FacilityController::class, 'index'])->name('facilities.index');
 Route::get('facilities/bookmarks', [FacilityController::class, 'bookmarks'])->middleware(['auth', 'role:user'])->name('facilities.bookmarks');
