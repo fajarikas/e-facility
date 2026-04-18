@@ -99,12 +99,12 @@ export function AppSidebar() {
     });
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar collapsible="icon" variant="inset" className="border-r-0 bg-white text-slate-900  ">
+            <SidebarHeader className="p-4 border-b border-gray-100 ">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={homeHref} prefetch>
+                        <SidebarMenuButton size="lg" asChild className="h-auto p-0 hover:bg-transparent transition-colors">
+                            <Link href="/" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -112,18 +112,20 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="px-2">
+                <div className="mt-4 px-4 mb-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    Menu Utama
+                </div>
                 <NavMain items={filteredNavItems} />
             </SidebarContent>
 
-            <SidebarFooter>
-                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
+            <SidebarFooter className="p-4 border-t border-slate-800 ">
                 {auth.user ? (
                     <NavUser />
                 ) : (
                     <SidebarMenu>
                         <SidebarMenuItem>
-                            <SidebarMenuButton asChild>
+                            <SidebarMenuButton asChild className="rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white">
                                 <Link href="/login">
                                     <LayoutGrid className="mr-2 size-4" />
                                     Login

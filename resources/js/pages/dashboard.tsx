@@ -24,6 +24,7 @@ import {
     RefreshCw,
     TimerOff,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -252,53 +253,21 @@ export default function Dashboard({ stats, calendar, recent_transactions }: Prop
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-                <Card>
-                    <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <CardTitle className="text-lg">
-                                Dashboard Monitoring BPMP Babel
-                            </CardTitle>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Update terakhir:{' '}
-                                {new Date(stats.generated_at).toLocaleString(
-                                    'id-ID',
-                                )}
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => applyYearFilter('all')}
-                            >
-                                Semua Tahun
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => applyYearFilter(new Date().getFullYear())}
-                            >
-                                Tahun Ini
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={resetToLatestYear}
-                            >
-                                Terbaru
-                            </Button>
-                            <Button size="sm" onClick={refreshPage}>
-                                <RefreshCw className="size-4" aria-hidden />
-                                Refresh
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex flex-wrap items-center gap-3">
-                            <p className="text-sm text-muted-foreground">
-                                Filter Tahun:
-                            </p>
+            <div className="flex flex-col gap-8 p-6 lg:p-10">
+                {/* Header Section */}
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900 ">
+                            Dashboard <span className="text-[#1f9cd7]">Utama</span>
+                        </h1>
+                        <p className="text-sm font-medium text-muted-foreground">
+                            Update terakhir:{' '}
+                            {new Date(stats.generated_at).toLocaleString('id-ID')}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 rounded-xl bg-white p-1 shadow-sm ring-1 ring-gray-100  ">
                             <select
                                 value={stats.selected_year}
                                 onChange={(e) => {
@@ -308,544 +277,204 @@ export default function Dashboard({ stats, calendar, recent_transactions }: Prop
                                             : Number(e.target.value);
                                     applyYearFilter(nextYear);
                                 }}
-                                className="rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                                className="h-9 rounded-lg border-none bg-transparent px-3 text-sm font-bold focus:ring-0"
                             >
-                                <option value="all">Semua</option>
+                                <option value="all">Semua Tahun</option>
                                 {years.map((y) => (
                                     <option key={y} value={y}>
-                                        {y}
+                                        Tahun {y}
                                     </option>
                                 ))}
                             </select>
-                            <p className="text-sm text-muted-foreground">
-                                Aktif: <span className="font-medium text-foreground">{yearLabel}</span>
-                            </p>
                         </div>
-
-                        <div className="flex flex-wrap gap-2">
-                            <Button asChild variant="secondary" size="sm">
-                                <Link href={transactions().url}>
-                                    Lihat Transaksi
-                                </Link>
-                            </Button>
-                            <Button asChild variant="outline" size="sm">
-                                <Link href={rooms().url}>Kelola Ruangan</Link>
-                            </Button>
-                            <Button asChild variant="outline" size="sm">
-                                <Link href={buildings().url}>
-                                    Kelola Bangunan
-                                </Link>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <section className="flex flex-col gap-4">
-                    <div>
-                        <h2 className="text-base font-semibold tracking-tight">
-                            Ringkasan
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Gambaran cepat kapasitas dan aktivitas.
-                        </p>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <DashboardStatCard
-                            title="Bangunan"
-                            value={stats.buildings.toLocaleString('id-ID')}
-                            icon={
-                                <LayoutGrid
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Ruangan"
-                            value={stats.rooms.toLocaleString('id-ID')}
-                            icon={
-                                <LayoutGrid
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Transaksi"
-                            value={stats.transactions.toLocaleString('id-ID')}
-                            icon={
-                                <CreditCard
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Pending Approval"
-                            value={stats.pending_transactions.toLocaleString(
-                                'id-ID',
-                            )}
-                            tone="warning"
-                            icon={
-                                <CalendarClock
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                    </div>
-                </section>
-
-                <section className="flex flex-col gap-4">
-                    <div>
-                        <h2 className="text-base font-semibold tracking-tight">
-                            Keuangan
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Ringkasan pendapatan dan performa transaksi.
-                        </p>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <DashboardStatCard
-                            title="Pendapatan Total"
-                            value={stats.total_income.toLocaleString('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                            })}
-                            description="Akumulasi seluruh transaksi."
-                            tone="success"
-                            icon={
-                                <CreditCard className="size-4" aria-hidden />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Pendapatan Hari Ini"
-                            value={stats.revenue_today.toLocaleString('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                            })}
-                            description="Masuk per hari (created_at)."
-                            tone="success"
-                            icon={
-                                <CreditCard
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Pendapatan Bulan Ini"
-                            value={stats.revenue_month_to_date.toLocaleString(
-                                'id-ID',
-                                { style: 'currency', currency: 'IDR' },
-                            )}
-                            description="Month-to-date."
-                            tone="success"
-                            icon={
-                                <CreditCard
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title={`Pendapatan ${yearLabel}`}
-                            value={stats.yearly_income.toLocaleString('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR',
-                            })}
-                            description={`Transaksi: ${stats.transactions_year_count.toLocaleString(
-                                'id-ID',
-                            )} • Rata-rata: ${stats.average_transaction_value_year.toLocaleString(
-                                'id-ID',
-                                { style: 'currency', currency: 'IDR' },
-                            )}`}
-                            tone="success"
-                            icon={
-                                <CreditCard
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                    </div>
-                </section>
-
-                <section className="flex flex-col gap-4">
-                    <div>
-                        <h2 className="text-base font-semibold tracking-tight">
-                            Operasional
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Status transaksi dan aktivitas harian.
-                        </p>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <DashboardStatCard
-                            title="Booked"
-                            value={stats.booked_count.toLocaleString('id-ID')}
-                            tone="success"
-                            icon={
-                                <BadgeCheck
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Pending Payment"
-                            value={stats.pending_payment_count.toLocaleString(
-                                'id-ID',
-                            )}
-                            tone="warning"
-                            icon={
-                                <CalendarClock
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Expired"
-                            value={stats.expired_count.toLocaleString('id-ID')}
-                            tone="danger"
-                            icon={
-                                <TimerOff className="size-4" aria-hidden />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Cancelled"
-                            value={stats.cancelled_count.toLocaleString('id-ID')}
-                            tone="danger"
-                            icon={
-                                <TimerOff className="size-4" aria-hidden />
-                            }
-                        />
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <DashboardStatCard
-                            title="Check-in Hari Ini"
-                            value={stats.check_ins_today.toLocaleString('id-ID')}
-                            icon={
-                                <CalendarArrowDown
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Check-out Hari Ini"
-                            value={stats.check_outs_today.toLocaleString(
-                                'id-ID',
-                            )}
-                            icon={
-                                <CalendarArrowUp
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Booking Aktif Hari Ini"
-                            value={stats.active_bookings_today.toLocaleString(
-                                'id-ID',
-                            )}
-                            description="Booking booked yang sedang berjalan."
-                            icon={
-                                <BadgeCheck
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                        <DashboardStatCard
-                            title="Check-in 7 Hari Kedepan"
-                            value={stats.upcoming_check_ins_7_days.toLocaleString(
-                                'id-ID',
-                            )}
-                            description="Total check-in booked (H+7)."
-                            icon={
-                                <CalendarClock
-                                    className="size-4"
-                                    aria-hidden
-                                />
-                            }
-                        />
-                    </div>
-                </section>
-
-                <section className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <h2 className="text-base font-semibold tracking-tight">
-                                Kalender Booking
-                            </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Klik tanggal untuk lihat ruangan & pemesan.
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigateCalendarMonth(-1)}
-                                disabled={isCalendarNavigating}
-                            >
-                                Bulan Sebelumnya
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigateCalendarMonth(1)}
-                                disabled={isCalendarNavigating}
-                            >
-                                Bulan Berikutnya
-                            </Button>
-                        </div>
-                    </div>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between gap-4">
-                            <CardTitle className="text-base">
-                                {calendarMonthLabel}
-                            </CardTitle>
-                            <Button asChild variant="secondary" size="sm">
-                                <Link href={transactions().url}>
-                                    Lihat Transaksi
-                                </Link>
-                            </Button>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-7 gap-2">
-                                {dayLabels.map((label) => (
-                                    <div
-                                        key={label}
-                                        className="text-center text-xs font-semibold tracking-wide text-muted-foreground uppercase"
-                                    >
-                                        {label}
-                                    </div>
-                                ))}
-
-                                {days.map((cell) => {
-                                    const total = cell.counts?.total ?? 0;
-                                    const booked = cell.counts?.booked ?? 0;
-                                    const pending = cell.counts?.pending ?? 0;
-
-                                    return (
-                                        <button
-                                            key={cell.dateKey}
-                                            type="button"
-                                            onClick={() => openDay(cell.dateKey)}
-                                            className={[
-                                                'relative flex h-20 flex-col justify-between rounded-lg border p-2 text-left transition',
-                                                cell.isInMonth
-                                                    ? 'border-border hover:bg-muted/50'
-                                                    : 'border-border bg-muted/30 text-muted-foreground',
-                                            ].join(' ')}
-                                        >
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="text-sm font-semibold">
-                                                    {cell.date.getDate()}
-                                                </div>
-                                                {total > 0 && (
-                                                    <div className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
-                                                        {total}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {total > 0 ? (
-                                                <div className="flex items-center gap-2 text-xs">
-                                                    {booked > 0 && (
-                                                        <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
-                                                            <span className="h-2 w-2 rounded-full bg-emerald-600"></span>
-                                                            <span>
-                                                                {booked} disetujui
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {pending > 0 && (
-                                                        <div className="flex items-center gap-1 text-amber-700 dark:text-amber-400">
-                                                            <span className="h-2 w-2 rounded-full bg-amber-600"></span>
-                                                            <span>
-                                                                {pending} pending
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="text-xs text-muted-foreground">
-                                                    Tidak ada booking
-                                                </div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </section>
-
-                <section className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <h2 className="text-base font-semibold tracking-tight">
-                                Analitik
-                            </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Tren bulanan dan distribusi status transaksi.
-                            </p>
-                        </div>
-                    </div>
-                    <div className="grid gap-4 lg:grid-cols-3">
-                        <div className="lg:col-span-2">
-                            <DashboardLineChart
-                                data={stats.monthly_transaction}
-                                selectedYear={stats.selected_year}
-                                onYearChange={applyYearFilter}
-                                showYearSelect={false}
-                            />
-                        </div>
-                        <div className="lg:col-span-1">
-                            <DashboardPieChart data={stats.count_transactions} />
-                        </div>
-                    </div>
-                </section>
-
-                <section className="flex flex-col gap-4">
-                    <div>
-                        <h2 className="text-base font-semibold tracking-tight">
-                            Top Performers
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Ruangan dan bangunan dengan income tertinggi.
-                        </p>
-                    </div>
-                    <div className="grid gap-4 lg:grid-cols-2">
-                        <Card className="h-full">
-                            <CardHeader className="flex flex-row items-center justify-between gap-4">
-                                <CardTitle className="text-base">
-                                    Top Ruangan (Income)
-                                </CardTitle>
-                                <p className="text-sm text-muted-foreground">
-                                    {yearLabel}
-                                </p>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex flex-col gap-3">
-                                    {stats.top_rooms_by_income.length ? (
-                                        stats.top_rooms_by_income.map(
-                                            (item) => (
-                                                <div
-                                                    key={item.room_id}
-                                                    className="flex items-start justify-between gap-4"
-                                                >
-                                                    <div className="min-w-0">
-                                                        <p className="truncate text-sm font-medium">
-                                                            {item.room_name}
-                                                        </p>
-                                                        <p className="truncate text-xs text-muted-foreground">
-                                                            {item.building_name}{' '}
-                                                            •{' '}
-                                                            {item.transactions}{' '}
-                                                            transaksi
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                                                        {item.income.toLocaleString(
-                                                            'id-ID',
-                                                            {
-                                                                style: 'currency',
-                                                                currency: 'IDR',
-                                                            },
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            ),
-                                        )
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground">
-                                            Belum ada data.
-                                        </p>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="h-full">
-                            <CardHeader className="flex flex-row items-center justify-between gap-4">
-                                <CardTitle className="text-base">
-                                    Top Bangunan (Income)
-                                </CardTitle>
-                                <p className="text-sm text-muted-foreground">
-                                    {yearLabel}
-                                </p>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex flex-col gap-3">
-                                    {stats.top_buildings_by_income.length ? (
-                                        stats.top_buildings_by_income.map(
-                                            (item) => (
-                                                <div
-                                                    key={item.building_id}
-                                                    className="flex items-start justify-between gap-4"
-                                                >
-                                                    <div className="min-w-0">
-                                                        <p className="truncate text-sm font-medium">
-                                                            {item.building_name}
-                                                        </p>
-                                                        <p className="truncate text-xs text-muted-foreground">
-                                                            {item.transactions}{' '}
-                                                            transaksi
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                                                        {item.income.toLocaleString(
-                                                            'id-ID',
-                                                            {
-                                                                style: 'currency',
-                                                                currency: 'IDR',
-                                                            },
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            ),
-                                        )
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground">
-                                            Belum ada data.
-                                        </p>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </section>
-
-                <section className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <h2 className="text-base font-semibold tracking-tight">
-                                Aktivitas Terbaru
-                            </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Monitoring transaksi terbaru.
-                            </p>
-                        </div>
-                        <Button asChild variant="link" size="sm">
-                            <Link href={transactions().url}>
-                                Buka semua transaksi
-                            </Link>
+                        <Button
+                            onClick={refreshPage}
+                            variant="outline"
+                            size="icon"
+                            className="rounded-xl shadow-sm"
+                        >
+                            <RefreshCw className="h-4 w-4" />
                         </Button>
                     </div>
-                    <RecentTransactionsTable
-                        recent_transactions={recent_transactions}
+                </div>
+
+                {/* Main Stats Grid */}
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <DashboardStatCard
+                        title="Pendapatan Total"
+                        value={stats.total_income.toLocaleString('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            maximumFractionDigits: 0,
+                        })}
+                        tone="success"
+                        icon={<CreditCard className="size-5" />}
+                        description="Akumulasi pendapatan sistem"
                     />
-                </section>
+                    <DashboardStatCard
+                        title="Booking Disetujui"
+                        value={stats.booked_count.toLocaleString('id-ID')}
+                        tone="info"
+                        icon={<BadgeCheck className="size-5" />}
+                        description="Total transaksi sukses"
+                    />
+                    <DashboardStatCard
+                        title="Pending Approval"
+                        value={stats.pending_transactions.toLocaleString('id-ID')}
+                        tone="warning"
+                        icon={<CalendarClock className="size-5" />}
+                        description="Menunggu konfirmasi admin"
+                    />
+                    <DashboardStatCard
+                        title="Total Ruangan"
+                        value={stats.rooms.toLocaleString('id-ID')}
+                        icon={<LayoutGrid className="size-5" />}
+                        description="Kapasitas fasilitas tersedia"
+                    />
+                </div>
+
+                <div className="grid gap-8 lg:grid-cols-3">
+                    {/* Calendar Section */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <h2 className="text-xl font-bold tracking-tight">Kalender Aktivitas</h2>
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Jadwal Penggunaan Fasilitas</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => navigateCalendarMonth(-1)}
+                                    className="h-8 w-8 p-0"
+                                >
+                                    <span className="sr-only">Prev</span>
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                </Button>
+                                <span className="text-sm font-bold min-w-[120px] text-center">{calendarMonthLabel}</span>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => navigateCalendarMonth(1)}
+                                    className="h-8 w-8 p-0"
+                                >
+                                    <span className="sr-only">Next</span>
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                </Button>
+                            </div>
+                        </div>
+
+                        <Card className="border-none bg-white shadow-sm ring-1 ring-gray-100   overflow-hidden">
+                            <CardContent className="p-0">
+                                <div className="grid grid-cols-7 border-b ">
+                                    {dayLabels.map((label) => (
+                                        <div key={label} className="py-3 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                            {label}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="grid grid-cols-7">
+                                    {days.map((cell) => {
+                                        const total = cell.counts?.total ?? 0;
+                                        const booked = cell.counts?.booked ?? 0;
+                                        return (
+                                            <button
+                                                key={cell.dateKey}
+                                                onClick={() => openDay(cell.dateKey)}
+                                                className={cn(
+                                                    "relative h-24 p-3 text-left transition-all border-r border-b ",
+                                                    !cell.isInMonth && "bg-gray-50/50  opacity-40",
+                                                    cell.isInMonth && "hover:bg-blue-50/50 "
+                                                )}
+                                            >
+                                                <span className={cn(
+                                                    "text-sm font-bold",
+                                                    new Date().toDateString() === cell.date.toDateString() && "flex h-7 w-7 items-center justify-center rounded-full bg-[#1f9cd7] text-white"
+                                                )}>
+                                                    {cell.date.getDate()}
+                                                </span>
+                                                {total > 0 && (
+                                                    <div className="mt-2 space-y-1">
+                                                        <div className={cn(
+                                                            "h-1.5 w-full rounded-full",
+                                                            booked > 0 ? "bg-emerald-500" : "bg-amber-500"
+                                                        )} />
+                                                        <span className="text-[10px] font-bold text-muted-foreground">{total} Trx</span>
+                                                    </div>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Performance Section */}
+                    <div className="space-y-6">
+                        <div className="space-y-1">
+                            <h2 className="text-xl font-bold tracking-tight">Analitik Status</h2>
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Distribusi Transaksi</p>
+                        </div>
+                        <Card className="border-none bg-white shadow-sm ring-1 ring-gray-100   p-4">
+                            <DashboardPieChart data={stats.count_transactions} />
+                        </Card>
+
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Top Performing Rooms</h3>
+                            <div className="space-y-3">
+                                {stats.top_rooms_by_income.slice(0, 4).map((item) => (
+                                    <div key={item.room_id} className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100  ">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold">{item.room_name}</span>
+                                            <span className="text-[10px] font-medium text-muted-foreground uppercase">{item.building_name}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm font-black text-[#1f9cd7]">
+                                                {item.income.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
+                                            </div>
+                                            <div className="text-[10px] font-medium text-muted-foreground">{item.transactions} Trx</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tren Pendapatan */}
+                <div className="space-y-6">
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-bold tracking-tight">Tren Pendapatan Bulanan</h2>
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Visualisasi Performa Tahunan</p>
+                    </div>
+                    <Card className="border-none bg-white shadow-sm ring-1 ring-gray-100   p-6">
+                        <DashboardLineChart
+                            data={stats.monthly_transaction}
+                            selectedYear={stats.selected_year}
+                            onYearChange={applyYearFilter}
+                            showYearSelect={false}
+                        />
+                    </Card>
+                </div>
+
+                {/* Recent Transactions */}
+                <div className="space-y-6 pb-10">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <h2 className="text-xl font-bold tracking-tight">Transaksi Terbaru</h2>
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Monitoring Log Sistem</p>
+                        </div>
+                        <Button asChild variant="link" className="text-[#1f9cd7] font-bold">
+                            <Link href={transactions().url}>Lihat Semua Transaksi</Link>
+                        </Button>
+                    </div>
+                    <div className="overflow-hidden rounded-3xl border-none bg-white shadow-sm ring-1 ring-gray-100  ">
+                        <RecentTransactionsTable
+                            recent_transactions={recent_transactions}
+                        />
+                    </div>
+                </div>
             </div>
 
             <Modal
@@ -877,12 +506,12 @@ export default function Dashboard({ stats, calendar, recent_transactions }: Prop
 
                                     <div className="flex items-center gap-2">
                                         <span
-                                            className={[
+                                            className={cn(
                                                 'inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold',
                                                 booking.status === 'booked'
-                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
-                                            ].join(' ')}
+                                                    ? 'bg-emerald-100 text-emerald-700  
+                                                    : 'bg-amber-100 text-amber-700  
+                                            )}
                                         >
                                             {booking.status === 'booked'
                                                 ? 'Disetujui'

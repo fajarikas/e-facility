@@ -25,17 +25,19 @@ export default function FacilityBookmarks({ data, likedRoomIds }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Bookmark" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-hidden rounded-xl p-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">
-                        Fasilitas Tersimpan
+            <div className="flex flex-col gap-10 p-6 lg:p-10">
+                {/* Header Section */}
+                <div className="flex flex-col gap-4 text-left">
+                    <h1 className="text-4xl font-black tracking-tight text-gray-900 ">
+                        Fasilitas <span className="text-[#1f9cd7]">Tersimpan</span>
                     </h1>
-                    <p className="mt-1 text-sm text-gray-600">
-                        Daftar fasilitas yang kamu bookmark.
+                    <p className="max-w-2xl text-base font-medium text-gray-500 ">
+                        Akses cepat ke semua gedung dan ruangan yang telah Anda tandai untuk rencana kegiatan mendatang.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {/* Grid Section */}
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {data.data.length ? (
                         data.data.map((room) => (
                             <FacilityCard
@@ -50,18 +52,33 @@ export default function FacilityBookmarks({ data, likedRoomIds }: Props) {
                             />
                         ))
                     ) : (
-                        <div className="col-span-full rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-600">
-                            Belum ada fasilitas yang kamu bookmark.
+                        <div className="col-span-full flex flex-col items-center justify-center rounded-[3rem] border-2 border-dashed border-gray-100 bg-white py-32 text-center   ring-1 ring-gray-50 ">
+                            <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 text-[#1f9cd7]  ">
+                                <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900  uppercase tracking-tight">Belum Ada Bookmark</h3>
+                            <p className="mt-2 text-sm font-medium text-gray-500 ">Cari fasilitas menarik dan simpan untuk diakses nanti.</p>
+                            <Link
+                                href="/facilities"
+                                className="mt-8 rounded-2xl bg-[#1f9cd7] px-8 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-[#1785b7] active:scale-95"
+                            >
+                                Cari Fasilitas
+                            </Link>
                         </div>
                     )}
                 </div>
 
-                <PaginationLinks
-                    links={data.links}
-                    from={data.from}
-                    to={data.to}
-                    total={data.total}
-                />
+                {/* Pagination */}
+                {data.total > data.per_page && (
+                    <div className="mt-10 border-t border-gray-100 pt-10 ">
+                        <PaginationLinks
+                            links={data.links}
+                            from={data.from}
+                            to={data.to}
+                            total={data.total}
+                        />
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

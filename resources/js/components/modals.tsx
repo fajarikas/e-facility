@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface ModalProps {
     isOpen: boolean;
@@ -19,13 +21,17 @@ const Modal: React.FC<ModalProps> = ({
     title,
     widthClass = 'max-w-lg',
 }) => {
-    // This component is client-only (`use client`), it's safe to access DOM directly.
     const portalContainer =
         typeof document !== 'undefined'
             ? document.getElementById('modal-root')
             : null;
 
     useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
         const handleEsc = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 onClose();
@@ -34,8 +40,9 @@ const Modal: React.FC<ModalProps> = ({
         window.addEventListener('keydown', handleEsc);
         return () => {
             window.removeEventListener('keydown', handleEsc);
+            document.body.style.overflow = 'unset';
         };
-    }, [onClose]);
+    }, [isOpen, onClose]);
 
     if (!portalContainer) {
         return null;
@@ -48,47 +55,37 @@ const Modal: React.FC<ModalProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex h-screen items-center justify-center bg-black/70"
+                    className="fixed inset-0 z-50 flex h-screen items-center justify-center bg-black/60 backdrop-blur-sm p-4"
                     onClick={onClose}
                 >
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                        className={`relative flex max-h-[90vh] w-11/12 flex-col rounded-lg bg-white text-[#454545] shadow-lg ${widthClass}`}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                        className={cn(
+                            "relative flex max-h-[90vh] w-full flex-col rounded-[2.5rem] bg-white shadow-2xl ring-1 ring-gray-100  ",
+                            widthClass
+                        )}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
-                            onClick={onClose}
-                            className="absolute top-4 right-4 cursor-pointer text-[#454545] hover:text-[#454545]/90"
-                            aria-label="Tutup modal"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b border-gray-100 p-8 ">
+                            <h2 className="text-xl font-black tracking-tight text-gray-900 uppercase ">
+                                {title}
+                            </h2>
+                            <button
+                                onClick={onClose}
+                                className="rounded-full bg-gray-50 p-2 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900    "
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
 
-                        {title && (
-                            <div className="border-b border-[#454545] p-6">
-                                <h1 className="text-center text-2xl font-bold uppercase">
-                                    {title}
-                                </h1>
-                            </div>
-                        )}
-
-                        <div className="overflow-y-auto p-6">{children}</div>
+                        {/* Content */}
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                            {children}
+                        </div>
                     </motion.div>
                 </motion.div>
             )}

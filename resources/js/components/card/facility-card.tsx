@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { RoomData } from '@/types/rooms';
 import { Link, router } from '@inertiajs/react';
-import { Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Heart, Users, MapPin, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type Props = {
     room: RoomData;
@@ -14,68 +16,116 @@ export default function FacilityCard({
     room,
     isLiked,
     onToggleLikeSuccess,
-    availability,
+    availability = 'available',
 }: Props) {
     const firstImage = room.images?.[0];
-    const rupiah = (amount: number) => `Rp${new Intl.NumberFormat('id-ID').format(amount)}`;
+    const rupiah = (amount: number) => `Rp ${new Intl.NumberFormat('id-ID').format(amount)}`;
 
-    const badge = (() => {
-        if (availability === 'booked') {
-            return { text: 'Booked', className: 'bg-red-100 text-red-700 border-red-200' };
-        }
-        if (availability === 'pending_payment') {
-            return { text: 'Menunggu Pembayaran', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' };
-        }
-        return { text: 'Tersedia', className: 'bg-green-100 text-green-700 border-green-200' };
-    })();
+    const statusConfig = {
+        booked: { text: 'Terisi', color: 'bg-rose-500', iconColor: 'text-rose-500' },
+        pending_payment: { text: 'Menunggu', color: 'bg-amber-500', iconColor: 'text-amber-500' },
+        available: { text: 'Tersedia', color: 'bg-[#1f9cd7]', iconColor: 'text-[#1f9cd7]' },
+    };
+
+    const config = statusConfig[availability];
 
     return (
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            viewport={{ once: true }}
+            className="group relative overflow-hidden rounded-[2rem] bg-white text-gray-900 shadow-sm ring-1 ring-gray-100 transition-all hover:-translate-y-2 hover:shadow-2xl   "
+        >
+
             <Link href={`/facilities/${room.id}`} className="block">
-                <div className="p-3">
-                    <div className="overflow-hidden rounded-lg bg-gray-100">
-                        {firstImage ? (
-                            <img
-                                src={`/storage/${firstImage}`}
-                                alt={room.name}
-                                className="h-44 w-full object-cover"
-                                loading="lazy"
-                            />
-                        ) : (
-                            <div className="flex h-44 w-full items-center justify-center text-xs text-gray-500">
-                                Gambar belum tersedia
-                            </div>
-                        )}
+                {/* Image Section */}
+                <div className="relative aspect-[4/3] overflow-hidden">
+                    {firstImage ? (
+                        <img
+                            src={`/storage/${firstImage}`}
+                            alt={room.name}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-50 text-xs font-medium text-gray-400 ">
+                            Gambar belum tersedia
+                        </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-4 left-4">
+                        <span className={cn(
+                            "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-lg",
+                            config.color
+                        )}>
+                            {config.text}
+                        </span>
                     </div>
 
-                    <div className="mt-3">
-                        <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm font-semibold text-gray-900">
-                                {room.name}
-                            </p>
-                            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${badge.className}`}>
-                                {badge.text}
+                    {/* Rating Badge */}
+                    <div className="absolute top-4 right-14">
+                        <div className="flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold text-gray-900 shadow-lg backdrop-blur-sm">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span>4.8</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="p-6">
+                    <div className="mb-4 text-left">
+                        <h3 className="mb-1 truncate text-lg font-black tracking-tight text-gray-900 group-hover:text-[#1f9cd7] transition-colors  text-left">
+                            {room.name}
+                        </h3>
+                        <div className="flex items-center gap-1 text-xs font-bold text-gray-500 uppercase tracking-widest ">
+                            <MapPin className="h-3 w-3 text-[#1f9cd7]" />
+                            <span>{room.building?.name}</span>
+                        </div>
+                    </div>
+
+                    <div className="mb-6 flex items-center gap-4 border-y border-gray-100 py-3 ">
+                        <div className="flex items-center gap-1.5 text-gray-600 ">
+                            <Users className="h-4 w-4" />
+                            <span className="text-xs font-bold">{room.capacity} Orang</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-gray-600 ">
+                            <Star className="h-4 w-4 text-yellow-500" />
+                            <span className="text-xs font-bold text-nowrap">Premium</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col text-left">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 ">Mulai Dari</span>
+                            <span className="text-lg font-black text-[#1f9cd7]">
+                                {rupiah(Number(room.price) || 0)}
+                                <span className="text-xs font-normal text-gray-400 ">/hari</span>
                             </span>
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">
-                            {room.building?.name}
-                        </p>
-
-                        <div className="mt-4 flex items-center justify-between">
-                            <p className="text-sm font-semibold text-blue-600">
-                                {rupiah(Number(room.price) || 0)}/hari
-                            </p>
+                        <div className="rounded-full bg-blue-50 p-2 text-[#1f9cd7] transition-colors group-hover:bg-[#1f9cd7] group-hover:text-white  ">
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                            </svg>
                         </div>
                     </div>
                 </div>
             </Link>
 
-            <div className="absolute top-3 right-3">
+            {/* Like Button */}
+            <div className="absolute top-4 right-4">
                 <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="h-10 w-10 rounded-full bg-white/90"
+                    className={cn(
+                        "h-9 w-9 rounded-full border-none shadow-lg backdrop-blur-md transition-all active:scale-90",
+                        isLiked 
+                            ? "bg-rose-500 text-white hover:bg-rose-600" 
+                            : "bg-white/90 text-gray-900 hover:bg-white   "
+                    )}
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -89,14 +139,13 @@ export default function FacilityCard({
                             },
                         );
                     }}
-                    aria-label={isLiked ? 'Hapus bookmark' : 'Bookmark'}
                 >
                     <Heart
-                        className="size-5"
+                        className="h-5 w-5"
                         fill={isLiked ? 'currentColor' : 'none'}
                     />
                 </Button>
             </div>
-        </div>
+        </motion.div>
     );
 }

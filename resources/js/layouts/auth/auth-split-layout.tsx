@@ -1,7 +1,4 @@
 import AppLogoIcon from '@/components/app-logo-icon';
-import { home } from '@/routes';
-import { type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
 interface AuthLayoutProps {
@@ -14,48 +11,64 @@ export default function AuthSplitLayout({
     title,
     description,
 }: PropsWithChildren<AuthLayoutProps>) {
-    const { name, quote } = usePage<SharedData>().props;
-
     return (
-        <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
-                <div className="absolute inset-0 bg-zinc-900" />
-                <Link
-                    href={home()}
-                    className="relative z-20 flex items-center text-lg font-medium"
-                >
-                    <AppLogoIcon className="mr-2 size-8 fill-current text-white" />
-                    {name}
-                </Link>
-                {quote && (
-                    <div className="relative z-20 mt-auto">
-                        <blockquote className="space-y-2">
-                            <p className="text-lg">
-                                &ldquo;{quote.message}&rdquo;
-                            </p>
-                            <footer className="text-sm text-neutral-300">
-                                {quote.author}
-                            </footer>
-                        </blockquote>
+        <div className="relative grid min-h-screen grid-cols-1 overflow-hidden font-poppins lg:grid-cols-2">
+            <div className="flex flex-col items-center justify-center bg-white p-8  lg:p-12">
+                <div className="w-full max-w-md space-y-8">
+                    <div className="flex items-center gap-3 transition-transform hover:scale-105">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1f9cd7] p-2 shadow-lg shadow-blue-500/20">
+                            <img src="/images/logo/bpmp.webp" alt="Logo" className="h-full w-full object-contain" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-xl font-black tracking-tight ">BPMP BABEL</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">E-Facility Platform</span>
+                        </div>
                     </div>
-                )}
-            </div>
-            <div className="w-full lg:p-8">
-                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <Link
-                        href={home()}
-                        className="relative z-20 flex items-center justify-center lg:hidden"
-                    >
-                        <AppLogoIcon className="h-10 fill-current text-black sm:h-12" />
-                    </Link>
-                    <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">
-                        <h1 className="text-xl font-medium">{title}</h1>
-                        <p className="text-sm text-balance text-muted-foreground">
+
+                    <div className="space-y-2">
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900  lg:text-4xl">
+                            {title}
+                        </h1>
+                        <p className="text-base font-medium text-muted-foreground">
                             {description}
                         </p>
                     </div>
+
                     {children}
+
+                    <div className="pt-8 text-center text-xs font-medium text-muted-foreground">
+                        &copy; 2026 BPMP Provinsi Kepulauan Bangka Belitung.
+                        <br />Seluruh hak cipta dilindungi.
+                    </div>
                 </div>
+            </div>
+
+            <div className="relative hidden bg-[#1f9cd7] lg:block">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-400/40 via-transparent to-transparent" />
+                
+                <div className="flex h-full flex-col items-center justify-center p-12 text-white">
+                    <div className="relative z-10 max-w-lg space-y-6 text-center">
+                        <h2 className="text-4xl font-black leading-tight tracking-tight lg:text-5xl">
+                            Solusi <span className="text-blue-200">Sewa Gedung</span> Terbaik & Terpercaya
+                        </h2>
+                        <p className="text-lg font-medium text-blue-50/90">
+                            Nikmati kemudahan dalam mengelola dan memesan fasilitas premium BPMP Babel dalam satu platform yang terintegrasi.
+                        </p>
+                        
+                        <div className="relative mt-12 overflow-hidden rounded-[2rem] shadow-2xl ring-1 ring-white/20">
+                            <img
+                                src="/images/login/preview.webp"
+                                alt="Dashboard Preview"
+                                className="h-full w-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Decorative Elements */}
+                <div className="absolute bottom-[-10%] right-[-10%] h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+                <div className="absolute top-[-5%] left-[-5%] h-48 w-48 rounded-full bg-blue-300/20 blur-2xl" />
             </div>
         </div>
     );

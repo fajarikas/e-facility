@@ -1,11 +1,14 @@
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { RichText } from '@/components/ui/rich-text';
+import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { DataMaster, PaymentMethod } from '@/types/data-master';
 import { RoomData } from '@/types/rooms';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Calendar, Heart } from 'lucide-react';
+import { Calendar, CreditCard, Heart, MapPin, Star, Users } from 'lucide-react';
 import { FormEvent, useMemo, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -32,8 +35,8 @@ export default function FacilityShow({
         { title: room.name, href: `/facilities/${room.id}` },
     ];
 
+    const { auth, errors: pageErrors } = usePage().props as { auth: { user: any }; errors?: Record<string, string> };
     const firstImage = room.images?.[0];
-    const { errors } = usePage().props as { errors?: Record<string, string> };
 
     const [checkInDate, setCheckInDate] = useState('');
     const [checkOutDate, setCheckOutDate] = useState('');
@@ -41,6 +44,9 @@ export default function FacilityShow({
     const [customerPhone, setCustomerPhone] = useState('');
     const [customerAddress, setCustomerAddress] = useState('');
     const [paymentMethodId, setPaymentMethodId] = useState<string>('');
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const errors = pageErrors || {};
 
     const today = useMemo(() => new Date().toLocaleDateString('en-CA'), []);
     const blockedDatesSet = useMemo(
@@ -84,6 +90,7 @@ export default function FacilityShow({
         const d = diffDays + 1;
         return { days: d, totalHarga: d * Number(room.price || 0) };
     }, [checkInDate, checkOutDate, room.price]);
+
     const rupiah = (amount: number) =>
         `Rp${new Intl.NumberFormat('id-ID').format(amount)}`;
 
@@ -102,6 +109,8 @@ export default function FacilityShow({
             }).showToast();
             return;
         }
+
+        setIsProcessing(true);
         router.post(
             `/facilities/${room.id}/order`,
             {
@@ -116,7 +125,7 @@ export default function FacilityShow({
             },
             {
                 preserveScroll: true,
-                onSuccess: () => {},
+                onFinish: () => setIsProcessing(false),
             },
         );
     };
@@ -125,444 +134,303 @@ export default function FacilityShow({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={room.name} />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-hidden rounded-xl p-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-800">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                {/* Header Section */}
+                <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[#1f9cd7] ">
+                                {room.building?.name}
+                            </span>
+                            <div className="flex items-center gap-1 text-yellow-400">
+                                <Star className="h-4 w-4 fill-current" />
+                                <span className="text-xs font-bold text-gray-900 ">4.9 (42 Reviews)</span>
+                            </div>
+                        </div>
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900 sm:text-4xl ">
                             {room.name}
                         </h1>
-                        <p className="mt-1 text-sm text-gray-600">
-                            {room.building?.name}
-                        </p>
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                            <MapPin className="h-4 w-4 text-[#1f9cd7]" />
+                            <span>BPMP Provinsi Kepulauan Bangka Belitung, Pangkalpinang</span>
+                        </div>
                     </div>
 
-                    <div className="flex gap-2">
-                        <Button variant="outline" asChild>
-                            <Link href="/facilities">Kembali</Link>
-                        </Button>
+                    <div className="flex items-center gap-3">
                         <Button
-                            type="button"
                             variant={isLiked ? 'default' : 'outline'}
-                            onClick={() =>
-                                router.post(
-                                    `/facilities/${room.id}/like`,
-                                    {},
-                                    {
-                                        preserveScroll: true,
-                                        preserveState: true,
-                                    },
-                                )
-                            }
+                            onClick={() => router.post(`/facilities/${room.id}/like`, {}, { preserveScroll: true })}
+                            className={cn(
+                                "rounded-xl font-bold transition-all",
+                                isLiked && "bg-rose-500 hover:bg-rose-600 border-none shadow-lg shadow-rose-500/20"
+                            )}
                         >
-                            <Heart
-                                className="mr-2 size-4"
-                                fill={isLiked ? 'currentColor' : 'none'}
-                            />
+                            <Heart className={cn("mr-2 h-4 w-4", isLiked && "fill-current")} />
                             {isLiked ? 'Tersimpan' : 'Simpan'}
+                        </Button>
+                        <Button variant="outline" asChild className="rounded-xl font-bold">
+                            <Link href="/facilities">
+                                <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                Kembali
+                            </Link>
                         </Button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+                    {/* Left Column: Content */}
+                    <div className="lg:col-span-2 space-y-10">
+                        {/* Gallery Section */}
+                        <div className="relative overflow-hidden rounded-[2.5rem] bg-gray-100 shadow-2xl ">
                             {firstImage ? (
                                 <img
                                     src={`/storage/${firstImage}`}
                                     alt={room.name}
-                                    className="h-72 w-full object-cover"
+                                    className="aspect-[16/9] w-full object-cover"
                                 />
                             ) : (
-                                <div className="flex h-72 w-full items-center justify-center text-sm text-gray-500">
+                                <div className="flex aspect-[16/9] w-full items-center justify-center text-sm font-bold text-gray-400 uppercase tracking-widest">
                                     Gambar belum tersedia
                                 </div>
                             )}
                         </div>
-                    </div>
 
-                    <div className="rounded-xl border border-gray-200 bg-white p-4">
-                        <div className="text-sm text-gray-700">
-                            <div className="font-semibold text-gray-900">
-                                Detail Singkat
+                        {/* Description Section */}
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="h-8 w-1 rounded-full bg-[#1f9cd7]" />
+                                <h2 className="text-xl font-black tracking-tight uppercase tracking-widest">Detail Fasilitas</h2>
                             </div>
-                            <div className="mt-3 space-y-2">
-                                <div>
-                                    <span className="text-gray-500">
-                                        Harga:
-                                    </span>{' '}
-                                    <span className="font-semibold text-blue-700">
-                                        {rupiah(Number(room.price) || 0)}/hari
-                                    </span>
-                                </div>
-                                <div>
-                                    <span className="text-gray-500">Info:</span>{' '}
-                                    Silakan cek deskripsi untuk detail
-                                    fasilitas.
-                                </div>
+                            <div className="prose prose-blue max-w-none ">
+                                <RichText html={room.description || ''} />
                             </div>
                         </div>
+
+                        {/* Features Grid */}
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                            {[
+                                { icon: Users, label: 'Kapasitas', value: `${room.capacity} Orang` },
+                                { icon: Calendar, label: 'Tersedia', value: 'Setiap Hari' },
+                                { icon: Star, label: 'Kualitas', value: 'Premium' },
+                                { icon: MapPin, label: 'Lokasi', value: 'Bangka Belitung' }
+                            ].map((feature, i) => (
+                                <div key={i} className="flex flex-col items-center justify-center rounded-3xl bg-gray-50 p-6 text-center  transition-colors hover:bg-blue-50 ">
+                                    <feature.icon className="mb-3 h-6 w-6 text-[#1f9cd7]" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{feature.label}</span>
+                                    <span className="mt-1 text-sm font-bold">{feature.value}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                    <div className="text-sm font-semibold text-gray-900">
-                        Deskripsi
-                    </div>
-                    <div className="mt-2">
-                        <RichText html={room.description || ''} />
-                    </div>
-                </div>
+                    {/* Right Column: Booking Sidebar */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-28 space-y-6">
+                            {auth.user ? (
+                                <Card className="overflow-hidden rounded-[2.5rem] border-none bg-white shadow-2xl ring-1 ring-gray-100  ">
+                                    <div className="bg-[#1f9cd7] p-6 text-white">
+                                        <span className="text-xs font-black uppercase tracking-widest opacity-80">Mulai Dari</span>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-3xl font-black">{rupiah(totalHarga || Number(room.price) || 0)}</span>
+                                            <span className="text-sm font-bold opacity-80">/hari</span>
+                                        </div>
+                                    </div>
+                                    <CardContent className="p-8">
+                                        <form onSubmit={submitOrder} className="space-y-6">
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Informasi Kontak</label>
+                                                    <input
+                                                        value={customerName}
+                                                        onChange={(e) => setCustomerName(e.target.value)}
+                                                        className="h-12 w-full rounded-xl border-gray-100 bg-gray-50 px-4 text-sm font-bold placeholder:text-gray-400 focus:ring-2 focus:ring-[#1f9cd7]  "
+                                                        placeholder="Nama Lengkap"
+                                                    />
+                                                    {errors.customer_name && <p className="text-xs font-bold text-rose-500">{errors.customer_name}</p>}
+                                                    <input
+                                                        value={customerPhone}
+                                                        onChange={(e) => setCustomerPhone(e.target.value)}
+                                                        className="h-12 w-full rounded-xl border-gray-100 bg-gray-50 px-4 text-sm font-bold placeholder:text-gray-400 focus:ring-2 focus:ring-[#1f9cd7]  "
+                                                        placeholder="Nomor WhatsApp"
+                                                    />
+                                                    {errors.customer_phone && <p className="text-xs font-bold text-rose-500">{errors.customer_phone}</p>}
+                                                    <textarea
+                                                        value={customerAddress}
+                                                        onChange={(e) => setCustomerAddress(e.target.value)}
+                                                        className="min-h-[80px] w-full rounded-xl border-gray-100 bg-gray-50 p-4 text-sm font-bold placeholder:text-gray-400 focus:ring-2 focus:ring-[#1f9cd7]  "
+                                                        placeholder="Alamat Lengkap"
+                                                    />
+                                                    {errors.customer_address && <p className="text-xs font-bold text-rose-500">{errors.customer_address}</p>}
+                                                </div>
 
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                    <div className="text-sm font-semibold text-gray-900">
-                        Order Fasilitas
-                    </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pilih Jadwal</label>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div className="relative">
+                                                            <DatePicker
+                                                                selected={checkInDate ? new Date(checkInDate) : null}
+                                                                onChange={(date: Date | null) => {
+                                                                    if (!date) {
+                                                                        setCheckInDate('');
+                                                                        return;
+                                                                    }
+                                                                    const formatted = date.toLocaleDateString('sv-SE');
+                                                                    if (isBlockedDate(formatted)) {
+                                                                        Toastify({
+                                                                            text: 'Tanggal tersebut sudah dibooking atau masih pending.',
+                                                                            duration: 4000,
+                                                                            close: true,
+                                                                            gravity: 'top',
+                                                                            position: 'left',
+                                                                            style: { background: '#B91C1C' },
+                                                                        }).showToast();
+                                                                        return;
+                                                                    }
+                                                                    setCheckInDate(formatted);
+                                                                }}
+                                                                minDate={new Date()}
+                                                                filterDate={(date) => !isBlockedDate(date.toLocaleDateString('sv-SE'))}
+                                                                dayClassName={(date) => isBlockedDate(date.toLocaleDateString('sv-SE')) ? 'bg-rose-100 text-rose-400 cursor-not-allowed opacity-50' : ''}
+                                                                placeholderText="Check-in"
+                                                                portalId="modal-root"
+                                                                className="h-12 w-full rounded-xl border-none bg-gray-50 px-4 text-xs font-bold "
+                                                            />
+                                                        </div>
+                                                        <div className="relative">
+                                                            <DatePicker
+                                                                selected={checkOutDate ? new Date(checkOutDate) : null}
+                                                                onChange={(date: Date | null) => {
+                                                                    if (!date) {
+                                                                        setCheckOutDate('');
+                                                                        return;
+                                                                    }
+                                                                    const formatted = date.toLocaleDateString('sv-SE');
+                                                                    if (isBlockedDate(formatted)) {
+                                                                        Toastify({
+                                                                            text: 'Tanggal tersebut sudah dibooking atau masih pending.',
+                                                                            duration: 4000,
+                                                                            close: true,
+                                                                            gravity: 'top',
+                                                                            position: 'left',
+                                                                            style: { background: '#B91C1C' },
+                                                                        }).showToast();
+                                                                        return;
+                                                                    }
+                                                                    if (checkInDate && isRangeBlocked(checkInDate, formatted)) {
+                                                                        Toastify({
+                                                                            text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
+                                                                            duration: 4000,
+                                                                            close: true,
+                                                                            gravity: 'top',
+                                                                            position: 'left',
+                                                                            style: { background: '#B91C1C' },
+                                                                        }).showToast();
+                                                                        return;
+                                                                    }
+                                                                    setCheckOutDate(formatted);
+                                                                }}
+                                                                minDate={checkInDate ? new Date(checkInDate) : new Date()}
+                                                                filterDate={(date) => !isBlockedDate(date.toLocaleDateString('sv-SE'))}
+                                                                dayClassName={(date) => isBlockedDate(date.toLocaleDateString('sv-SE')) ? 'bg-rose-100 text-rose-400 cursor-not-allowed opacity-50' : ''}
+                                                                placeholderText="Check-out"
+                                                                portalId="modal-root"
+                                                                className="h-12 w-full rounded-xl border-none bg-gray-50 px-4 text-xs font-bold "
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    {errors.check_in_date && <p className="text-xs font-bold text-rose-500">{errors.check_in_date}</p>}
+                                                    {errors.check_out_date && <p className="text-xs font-bold text-rose-500">{errors.check_out_date}</p>}
+                                                </div>
 
-                    <form
-                        onSubmit={submitOrder}
-                        className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3"
-                    >
-                        <div className="md:col-span-1">
-                            <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
-                                Nama
-                            </label>
-                            <input
-                                value={customerName}
-                                onChange={(e) =>
-                                    setCustomerName(e.target.value)
-                                }
-                                className="h-12 w-full rounded-md border border-gray-200 px-3 text-sm"
-                                placeholder="Nama pemesan"
-                            />
-                            {errors?.customer_name && (
-                                <div className="mt-1 text-xs text-red-600">
-                                    {errors.customer_name}
-                                </div>
-                            )}
-                        </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Metode Pembayaran</label>
+                                                    <select
+                                                        value={paymentMethodId}
+                                                        onChange={(e) => setPaymentMethodId(e.target.value)}
+                                                        className="h-12 w-full rounded-xl border-none bg-gray-50 px-4 text-sm font-bold "
+                                                    >
+                                                        <option value="">Pilih Metode</option>
+                                                        {paymentMethods?.map((m) => (
+                                                            <option key={m.id} value={String(m.id)}>
+                                                                {m.bank_name} - {m.type.toUpperCase()}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    {errors.payment_method_id && <p className="text-xs font-bold text-rose-500">{errors.payment_method_id}</p>}
+                                                </div>
+                                            </div>
 
-                        <div className="md:col-span-1">
-                            <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
-                                Nomor Telepon
-                            </label>
-                            <input
-                                value={customerPhone}
-                                onChange={(e) =>
-                                    setCustomerPhone(e.target.value)
-                                }
-                                className="h-12 w-full rounded-md border border-gray-200 px-3 text-sm"
-                                placeholder="08xxxxxxxxxx"
-                            />
-                            {errors?.customer_phone && (
-                                <div className="mt-1 text-xs text-red-600">
-                                    {errors.customer_phone}
-                                </div>
-                            )}
-                        </div>
+                                            {days > 0 && (
+                                                <div className="rounded-2xl bg-blue-50 p-4 ">
+                                                    <div className="flex justify-between text-xs font-bold mb-2">
+                                                        <span className="text-muted-foreground">Durasi ({days} Hari)</span>
+                                                        <span>{rupiah(Number(room.price) || 0)} x {days}</span>
+                                                    </div>
+                                                    <div className="border-t border-blue-100 mt-2 pt-2 flex justify-between items-center">
+                                                        <span className="text-sm font-black text-[#1f9cd7]">Total Bayar</span>
+                                                        <span className="text-lg font-black text-[#1f9cd7]">{rupiah(totalHarga)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
 
-                        <div className="md:col-span-1">
-                            <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
-                                Alamat
-                            </label>
-                            <input
-                                value={customerAddress}
-                                onChange={(e) =>
-                                    setCustomerAddress(e.target.value)
-                                }
-                                className="h-12 w-full rounded-md border border-gray-200 px-3 text-sm"
-                                placeholder="Alamat pemesan"
-                            />
-                            {errors?.customer_address && (
-                                <div className="mt-1 text-xs text-red-600">
-                                    {errors.customer_address}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="md:col-span-3">
-                            <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
-                                Metode Pembayaran
-                            </label>
-                            <select
-                                value={paymentMethodId}
-                                onChange={(e) =>
-                                    setPaymentMethodId(e.target.value)
-                                }
-                                className="h-12 w-full rounded-md border border-gray-200 bg-white px-3 text-sm"
-                            >
-                                <option value="">
-                                    Pilih metode pembayaran...
-                                </option>
-                                {paymentMethods?.map((m) => (
-                                    <option key={m.id} value={String(m.id)}>
-                                        {m.type === 'va' ? 'VA' : 'Transfer'} -{' '}
-                                        {m.bank_name} ({m.account_number})
-                                    </option>
-                                ))}
-                            </select>
-                            {errors?.payment_method_id && (
-                                <div className="mt-1 text-xs text-red-600">
-                                    {errors.payment_method_id}
-                                </div>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
-                                Dari Tanggal
-                            </label>
-
-                            <div className="relative">
-                                <DatePicker
-                                    selected={
-                                        checkInDate
-                                            ? new Date(checkInDate)
-                                            : null
-                                    }
-                                    onChange={(date: Date | null) => {
-                                        if (!date) {
-                                            setCheckInDate('');
-                                            return;
-                                        }
-
-                                        const formatted =
-                                            date.toLocaleDateString('sv-SE');
-
-                                        if (isBlockedDate(formatted)) {
-                                            Toastify({
-                                                text: 'Tanggal tersebut sudah dibooking atau masih pending.',
-                                                duration: 4000,
-                                                close: true,
-                                                gravity: 'top',
-                                                position: 'left',
-                                                style: {
-                                                    background: '#B91C1C',
-                                                },
-                                            }).showToast();
-                                            return;
-                                        }
-
-                                        setCheckInDate(formatted);
-
-                                        if (
-                                            checkOutDate &&
-                                            isRangeBlocked(
-                                                formatted,
-                                                checkOutDate,
-                                            )
-                                        ) {
-                                            Toastify({
-                                                text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
-                                                duration: 4000,
-                                                close: true,
-                                                gravity: 'top',
-                                                position: 'left',
-                                                style: {
-                                                    background: '#B91C1C',
-                                                },
-                                            }).showToast();
-                                            setCheckOutDate('');
-                                        }
-                                    }}
-                                    minDate={new Date()}
-                                    filterDate={(date) => {
-                                        const formatted =
-                                            date.toLocaleDateString('sv-SE');
-                                        return !isBlockedDate(formatted);
-                                    }}
-                                    dayClassName={(date) => {
-                                        const formatted =
-                                            date.toLocaleDateString('sv-SE');
-
-                                        return isBlockedDate(formatted)
-                                            ? 'bg-red-400 text-red-600 cursor-not-allowed'
-                                            : '';
-                                    }}
-                                    placeholderText="Pilih tanggal"
-                                    dateFormat="yyyy-MM-dd"
-                                    // 🔥 padding kiri ditambah biar ga ketiban icon
-                                    className="h-12 w-full rounded-md border border-gray-200 pr-3 pl-10 text-sm"
-                                />
-
-                                {/* ICON */}
-                                <Calendar
-                                    size={18}
-                                    className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
-                                />
-                            </div>
-
-                            {errors?.check_in_date && (
-                                <div className="mt-1 text-xs text-red-600">
-                                    {errors.check_in_date}
-                                </div>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="mb-1 block text-xs font-semibold text-gray-600 uppercase">
-                                Sampai Tanggal
-                            </label>
-
-                            <div className="relative">
-                                <DatePicker
-                                    selected={
-                                        checkOutDate
-                                            ? new Date(checkOutDate)
-                                            : null
-                                    }
-                                    onChange={(date: Date | null) => {
-                                        if (!date) {
-                                            setCheckOutDate('');
-                                            return;
-                                        }
-
-                                        const formatted =
-                                            date.toLocaleDateString('sv-SE');
-
-                                        if (isBlockedDate(formatted)) {
-                                            Toastify({
-                                                text: 'Tanggal tersebut sudah dibooking atau masih pending.',
-                                                duration: 4000,
-                                                close: true,
-                                                gravity: 'top',
-                                                position: 'left',
-                                                style: {
-                                                    background: '#B91C1C',
-                                                },
-                                            }).showToast();
-                                            return;
-                                        }
-
-                                        if (
-                                            checkInDate &&
-                                            isRangeBlocked(
-                                                checkInDate,
-                                                formatted,
-                                            )
-                                        ) {
-                                            Toastify({
-                                                text: 'Rentang tanggal berisi tanggal yang sudah dibooking.',
-                                                duration: 4000,
-                                                close: true,
-                                                gravity: 'top',
-                                                position: 'left',
-                                                style: {
-                                                    background: '#B91C1C',
-                                                },
-                                            }).showToast();
-                                            return;
-                                        }
-
-                                        setCheckOutDate(formatted);
-                                    }}
-                                    minDate={
-                                        checkInDate
-                                            ? new Date(checkInDate)
-                                            : new Date()
-                                    }
-                                    filterDate={(date) => {
-                                        const formatted =
-                                            date.toLocaleDateString('sv-SE');
-                                        return !isBlockedDate(formatted);
-                                    }}
-                                    dayClassName={(date) => {
-                                        const formatted =
-                                            date.toLocaleDateString('sv-SE');
-
-                                        return isBlockedDate(formatted)
-                                            ? 'bg-red-400 text-red-600 cursor-not-allowed'
-                                            : '';
-                                    }}
-                                    placeholderText="Pilih tanggal"
-                                    dateFormat="yyyy-MM-dd"
-                                    // 🔥 padding kiri biar ga ketabrak icon
-                                    className="h-12 w-full rounded-md border border-gray-200 pr-3 pl-10 text-sm"
-                                />
-
-                                {/* ICON */}
-                                <Calendar
-                                    size={18}
-                                    className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
-                                />
-                            </div>
-
-                            {errors?.check_out_date && (
-                                <div className="mt-1 text-xs text-red-600">
-                                    {errors.check_out_date}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex items-end justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
-                            <div className="text-sm text-gray-700">
-                                <div>
-                                    <span className="text-gray-500">
-                                        Total hari:
-                                    </span>{' '}
-                                    <span className="font-semibold">
-                                        {days || '-'}
-                                    </span>
-                                </div>
-                                <div className="mt-1">
-                                    <span className="text-gray-500">
-                                        Total harga:
-                                    </span>{' '}
-                                    <span className="font-semibold text-blue-700">
-                                        {days > 0 ? rupiah(totalHarga) : '-'}
-                                    </span>
-                                </div>
-                            </div>
-                            <Button
-                                type="submit"
-                                disabled={
-                                    !customerName ||
-                                    !customerPhone ||
-                                    !customerAddress ||
-                                    !checkInDate ||
-                                    !checkOutDate ||
-                                    days <= 0 ||
-                                    isRangeBlocked(checkInDate, checkOutDate) ||
-                                    (paymentMethods?.length
-                                        ? !paymentMethodId
-                                        : false)
-                                }
-                            >
-                                Buat Pesanan
-                            </Button>
-                        </div>
-                    </form>
-
-                    {errors?.data_master && (
-                        <div className="mt-2 text-xs text-red-600">
-                            {errors.data_master}
-                        </div>
-                    )}
-
-                    {dataMaster && (
-                        <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-                            <div className="font-semibold">Info Pembayaran</div>
-                            {paymentMethods?.length ? (
-                                <div className="mt-1 text-blue-800">
-                                    Pilih metode pembayaran saat membuat
-                                    pesanan.
-                                </div>
+                                            <Button
+                                                type="submit"
+                                                className="h-14 w-full rounded-2xl bg-[#1f9cd7] text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/30 hover:bg-[#1785b7] active:scale-95 disabled:opacity-50"
+                                                tabIndex={4}
+                                                disabled={
+                                                    !customerName || 
+                                                    !customerPhone || 
+                                                    !customerAddress || 
+                                                    !checkInDate || 
+                                                    !checkOutDate || 
+                                                    !paymentMethodId ||
+                                                    isProcessing
+                                                }
+                                            >
+                                                {isProcessing ? <Spinner /> : 'Booking Sekarang'}
+                                            </Button>
+                                        </form>
+                                    </CardContent>
+                                </Card>
                             ) : (
-                                <div className="mt-1">
-                                    VA:{' '}
-                                    <span className="font-semibold">
-                                        {dataMaster.va_number}
-                                    </span>
+                                <Card className="overflow-hidden rounded-[2.5rem] border-none bg-white shadow-2xl ring-1 ring-gray-100  ">
+                                    <div className="bg-[#1f9cd7] p-6 text-white text-center">
+                                        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md">
+                                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                        </div>
+                                        <h3 className="text-lg font-black uppercase tracking-tight">Akses Terbatas</h3>
+                                        <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Silakan login untuk memesan</p>
+                                    </div>
+                                    <CardContent className="p-8 text-center">
+                                        <p className="mb-6 text-sm font-medium text-muted-foreground leading-relaxed">
+                                            Anda harus memiliki akun dan masuk ke sistem untuk dapat melakukan penyewaan fasilitas kami secara online.
+                                        </p>
+                                        <Button asChild className="h-14 w-full rounded-2xl bg-[#1f9cd7] text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-[#1785b7] active:scale-95">
+                                            <Link href="/login">Masuk Sekarang</Link>
+                                        </Button>
+                                        <div className="mt-4">
+                                            <Link href="/register" className="text-xs font-black text-[#1f9cd7] uppercase tracking-widest hover:underline">
+                                                Daftar Akun Baru
+                                            </Link>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* Payment Info Helper */}
+                            {dataMaster && auth.user && (
+                                <div className="rounded-[2rem] bg-amber-50 p-6  border border-amber-100 ">
+                                    <div className="flex items-center gap-2 mb-3 text-amber-700 ">
+                                        <CreditCard className="h-5 w-5" />
+                                        <span className="text-sm font-black uppercase tracking-widest">Info Pembayaran</span>
+                                    </div>
+                                    <p className="text-xs font-bold leading-relaxed text-amber-800 ">
+                                        Pembayaran akan dikonfirmasi oleh tim admin BPMP Babel. Pastikan data yang Anda masukkan sudah benar.
+                                    </p>
                                 </div>
                             )}
-                            <div className="mt-1 text-blue-800">
-                                Kontak: {dataMaster.name} — {dataMaster.contact}
-                            </div>
-                            <div className="mt-2 text-xs text-blue-800">
-                                Setelah pesanan dibuat, admin akan konfirmasi
-                                pembayaran dan menyetujui booking.
-                            </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </AppLayout>
