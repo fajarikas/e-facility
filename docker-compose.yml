@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: e-facility-app
+    container_name: e-facility-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      # Masukkan sisa env lainnya di file .env di VPS nanti
+    volumes:
+      - ./storage:/var/www/storage
+      - ./public/images:/var/www/public/images
