@@ -26,7 +26,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Copy application contents
+# Copy application contents (Termasuk folder public/build yang sudah Anda buat di lokal)
 COPY . /var/www
 
 # Install PHP dependencies

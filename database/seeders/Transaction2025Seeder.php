@@ -10,6 +10,7 @@ use App\Models\Transaction_Detail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Faker\Factory as Faker;
 
 class Transaction2025Seeder extends Seeder
 {
@@ -23,6 +24,7 @@ class Transaction2025Seeder extends Seeder
      */
     public function run(): void
     {
+        $faker = Faker::create('id_ID');
         $rooms = Room::query()->orderBy('id')->limit(15)->get();
         if ($rooms->isEmpty()) {
             $this->command?->warn('Transaction2025Seeder skipped: no rooms found.');
@@ -116,9 +118,9 @@ class Transaction2025Seeder extends Seeder
                 $transaction = Transaction::create([
                     'check_in_date' => $checkIn->toDateString(),
                     'check_out_date' => $checkOut->toDateString(),
-                    'customer_name' => fake()->name(),
-                    'customer_phone' => fake()->phoneNumber(),
-                    'customer_address' => fake()->address(),
+                    'customer_name' => $faker->name(),
+                    'customer_phone' => $faker->phoneNumber(),
+                    'customer_address' => $faker->address(),
                     'status' => $status,
                     'expires_at' => $expiresAt,
                     'total_harga' => $totalHarga,
