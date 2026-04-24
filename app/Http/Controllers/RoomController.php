@@ -15,6 +15,7 @@ class RoomController extends Controller
     public function index(Request $request)
     {
         $search = trim((string) $request->query('search', ''));
+        $perPage = $request->query('per_page', 10);
 
         $rooms = Room::query()
             ->with('building')
@@ -29,7 +30,7 @@ class RoomController extends Controller
                 });
             })
             ->latest()
-            ->paginate(10)
+            ->paginate($perPage)
             ->withQueryString();
         $buildings = Building::orderBy('name')->get();
 
@@ -38,6 +39,7 @@ class RoomController extends Controller
             'buildings' => $buildings,
             'filters' => [
                 'search' => $search,
+                'per_page' => (int) $perPage,
             ],
         ]);
     }

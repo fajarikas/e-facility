@@ -14,6 +14,7 @@ class BuildingController extends Controller
     public function index(Request $request)
     {
         $search = trim((string) $request->query('search', ''));
+        $perPage = $request->query('per_page', 10);
 
         $buildings = Building::query()
             ->when($search !== '', function ($query) use ($search): void {
@@ -23,7 +24,7 @@ class BuildingController extends Controller
                 });
             })
             ->latest()
-            ->paginate(10)
+            ->paginate($perPage)
             ->withQueryString();
         $buildingId = $request->get('buildingId');
         $selectedBuilding = null;
@@ -38,6 +39,7 @@ class BuildingController extends Controller
             'buildingDetail' => $buildingId,
             'filters' => [
                 'search' => $search,
+                'per_page' => (int) $perPage,
             ],
         ]);
     }

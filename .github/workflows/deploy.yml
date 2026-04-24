@@ -1,0 +1,44 @@
+name: deploy
+
+on:
+  workflow_run:
+    workflows: ["tests"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~/e-facility
+            git pull origin main
+            
+            # Rebuild and Run Container
+            docker build --network=host -t e-facility .
+            docker rm -f e-facility-app || true
+            docker run -d \
+              -p 8080:80 \
+              --name e-facility-app \
+              --env-file .env \
+              -v $(pwd)/storage:/var/www/storage \
+              e-facility
+            
+            # Optimasi & Database
+            docker exec e-facility-app php artisan migrate --force
+            docker exec e-facility-app php artisan config:cache
+            docker exec e-facility-app php artisan route:cache
+            docker exec e-facility-app php artisan view:cache
+            docker exec e-facility-app php artisan storage:link
+            
+            # Perbaiki Permission Storage
+            sudo chmod -R 777 storage bootstrap/cache
