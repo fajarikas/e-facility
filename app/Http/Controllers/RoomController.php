@@ -16,7 +16,7 @@ class RoomController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
 
-        $room = Room::query()
+        $rooms = Room::query()
             ->with('building')
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
@@ -34,7 +34,7 @@ class RoomController extends Controller
         $buildings = Building::orderBy('name')->get();
 
         return Inertia::render('rooms/index', [
-            'data' => $room,
+            'data' => $rooms,
             'buildings' => $buildings,
             'filters' => [
                 'search' => $search,
