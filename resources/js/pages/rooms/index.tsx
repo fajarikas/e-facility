@@ -168,7 +168,7 @@ const index = ({ data, buildings, filters }: Props) => {
                             >
                                 {/* Image Container */}
                                 <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
-                                    {item.images && item.images.length > 0 ? (
+                                    {item.images && Array.isArray(item.images) && item.images.length > 0 ? (
                                         <img 
                                             src={`/storage/${item.images[0]}`} 
                                             alt={item.name} 
@@ -204,7 +204,7 @@ const index = ({ data, buildings, filters }: Props) => {
                                 <div className="p-6 flex-1 flex flex-col">
                                     <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">
                                         <HiOutlineLocationMarker size={14} />
-                                        {item.building.name}
+                                        {item.building?.name || 'Gedung tidak ditemukan'}
                                     </div>
                                     
                                     <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
