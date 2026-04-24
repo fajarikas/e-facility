@@ -43,9 +43,11 @@ jobs:
           port: 22
           script: |
             cd ~/e-facility
-            git pull origin main
+            # Paksa ambil kode terbaru, buang perubahan lokal yang bikin conflict
+            git fetch --all
+            git reset --hard origin/main
             
-            # Build & Restart
+            # Rebuild & Restart dengan paksa
             docker build --network=host -t e-facility .
             docker rm -f e-facility-app || true
             docker run -d \
