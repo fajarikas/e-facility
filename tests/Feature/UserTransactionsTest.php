@@ -8,10 +8,10 @@ use Database\Factories\BuildingFactory;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('user can view their transaction list', function () {
-    $user = User::factory()->withoutTwoFactor()->create();
-    $otherUser = User::factory()->withoutTwoFactor()->create();
+    $user = User::factory()->withoutTwoFactor()->create(['role' => 'user']);
+    $otherUser = User::factory()->withoutTwoFactor()->create(['role' => 'user']);
 
-    $building = BuildingFactory::new()->create();
+    $building = \App\Models\Building::factory()->create();
     $room = Room::query()->create([
         'name' => 'Ruang 1',
         'price' => 10000,
@@ -62,10 +62,10 @@ test('user can view their transaction list', function () {
 });
 
 test('user can not view another users transaction', function () {
-    $user = User::factory()->withoutTwoFactor()->create();
-    $otherUser = User::factory()->withoutTwoFactor()->create();
+    $user = User::factory()->withoutTwoFactor()->create(['role' => 'user']);
+    $otherUser = User::factory()->withoutTwoFactor()->create(['role' => 'user']);
 
-    $building = BuildingFactory::new()->create();
+    $building = \App\Models\Building::factory()->create();
     $room = Room::query()->create([
         'name' => 'Ruang 2',
         'price' => 10000,
