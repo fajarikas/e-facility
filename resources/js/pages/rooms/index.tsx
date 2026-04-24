@@ -32,7 +32,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const index = ({ data, buildings, filters }: Props) => {
+const RoomsIndex = ({ data, buildings, filters }: Props) => {
     const roomData = data.data;
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -47,7 +47,9 @@ const index = ({ data, buildings, filters }: Props) => {
     const [searchValue, setSearchValue] = useState(filters.search ?? '');
 
     useEffect(() => {
-        setSearchValue(filters.search ?? '');
+        if (filters.search !== undefined) {
+            setSearchValue(filters.search ?? '');
+        }
     }, [filters.search]);
 
     const handlePerPageChange = (newPerPage: string) => {
@@ -389,4 +391,4 @@ const index = ({ data, buildings, filters }: Props) => {
     );
 };
 
-export default index;
+export default RoomsIndex;

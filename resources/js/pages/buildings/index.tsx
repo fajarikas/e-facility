@@ -25,7 +25,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Buildings = ({
+const BuildingsIndex = ({
     data,
     filters,
 }: {
@@ -52,7 +52,9 @@ const Buildings = ({
     const [searchValue, setSearchValue] = useState(filters.search ?? '');
 
     useEffect(() => {
-        setSearchValue(filters.search ?? '');
+        if (filters.search !== undefined) {
+            setSearchValue(filters.search ?? '');
+        }
     }, [filters.search]);
 
     const handlePerPageChange = (newPerPage: string) => {
@@ -380,4 +382,4 @@ const Buildings = ({
     );
 };
 
-export default Buildings;
+export default BuildingsIndex;
