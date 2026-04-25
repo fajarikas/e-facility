@@ -46,12 +46,6 @@ const RoomsIndex = ({ data, buildings, filters }: Props) => {
     const [importFile, setImportFile] = useState<File | null>(null);
     const [searchValue, setSearchValue] = useState(filters.search ?? '');
 
-    useEffect(() => {
-        if (filters.search !== undefined) {
-            setSearchValue(filters.search ?? '');
-        }
-    }, [filters.search]);
-
     const handlePerPageChange = (newPerPage: string) => {
         router.get(
             rooms().url,

@@ -39,11 +39,7 @@ const userNavItems: NavItem[] = [
     },
 ];
 
-interface AppHeaderProps {
-    breadcrumbs?: BreadcrumbItem[];
-}
-
-export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
+export function AppHeader() {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();

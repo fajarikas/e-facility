@@ -25,9 +25,13 @@ export default function UserTransactionShow({ transaction, contactUrl }: Props) 
     const rupiah = (amount: number) => `Rp${new Intl.NumberFormat('id-ID').format(amount)}`;
     const status = transaction.status || (transaction.is_booked === 'Yes' ? 'booked' : 'pending_payment');
 
-    const expiresAt = transaction.expires_at ? new Date(transaction.expires_at) : null;
+    const expiresAt = useMemo(() => {
+        return transaction.expires_at ? new Date(transaction.expires_at) : null;
+    }, [transaction.expires_at]);
+
     const remainingMs = useMemo(() => {
-        return expiresAt ? expiresAt.getTime() - Date.now() : null;
+        if (!expiresAt) return null;
+        return expiresAt.getTime() - new Date().getTime();
     }, [expiresAt]);
     const remainingMin = remainingMs !== null ? Math.max(0, Math.floor(remainingMs / 60000)) : null;
     const remainingSec = remainingMs !== null ? Math.max(0, Math.floor((remainingMs % 60000) / 1000)) : null;
