@@ -29,5 +29,6 @@
     </head>
     <body class="font-sans antialiased bg-white text-gray-900">
         @inertia
+        <div id="modal-root"></div>
     </body>
 </html>
