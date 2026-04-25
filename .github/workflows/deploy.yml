@@ -64,5 +64,6 @@ jobs:
             docker exec e-facility-app php artisan view:cache
             docker exec e-facility-app php artisan storage:link
             
-            # Fix Permissions
-            sudo chmod -R 777 storage bootstrap/cache
+            # Fix Permissions dari dalam Container (Tanpa Sudo VPS)
+            docker exec -u root e-facility-app chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+            docker exec -u root e-facility-app chmod -R 775 /var/www/storage /var/www/bootstrap/cache
