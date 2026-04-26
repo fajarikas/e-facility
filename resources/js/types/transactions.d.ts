@@ -1,6 +1,6 @@
+import { DataMaster, PaymentMethod } from './data-master';
 import { User } from './index';
 import { RoomData } from './rooms';
-import { DataMaster, PaymentMethod } from './data-master';
 
 export interface TransactionDetailData {
     id: number;
@@ -10,6 +10,7 @@ export interface TransactionDetailData {
 
 export interface TransactionData {
     id: number;
+    created_at: string;
     check_in_date: string;
     check_out_date: string;
     customer_name?: string | null;

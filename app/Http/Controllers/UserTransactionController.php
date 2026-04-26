@@ -8,7 +8,7 @@ use Inertia\Inertia;
 
 class UserTransactionController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): \Inertia\Response
     {
         Transaction::expirePending();
 
@@ -26,7 +26,7 @@ class UserTransactionController extends Controller
         ]);
     }
 
-    public function show(Request $request, Transaction $transaction)
+    public function show(Request $request, Transaction $transaction): \Inertia\Response
     {
         Transaction::expirePending();
 
@@ -38,16 +38,10 @@ class UserTransactionController extends Controller
             abort(403);
         }
 
-        $transaction->load(['room.building', 'dataMaster', 'paymentMethod', 'details.user']);
+        $transaction->load(['room.building', 'dataMaster', 'details.user']);
 
         $contact = $transaction->dataMaster?->contact ?? '';
         $digits = preg_replace('/\\D+/', '', $contact ?? '');
-
-        $paymentMethod = $transaction->paymentMethod;
-        $paymentLabel = $paymentMethod
-            ? (($paymentMethod->type === 'va' ? 'VA' : 'Transfer').' - '.$paymentMethod->bank_name)
-            : 'VA';
-        $paymentNumber = $paymentMethod?->account_number ?: ($transaction->dataMaster?->va_number ?? '-');
 
         $roomName = $transaction->room?->name ?: '-';
         $buildingName = $transaction->room?->building?->name ?: '-';
@@ -57,19 +51,15 @@ class UserTransactionController extends Controller
         $totalFormatted = 'Rp '.number_format((int) $transaction->total_harga, 0, ',', '.');
 
         $message = implode("\n", array_filter([
-            '*Konfirmasi Pembayaran Pesanan*',
+            '*Konfirmasi Booking Fasilitas*',
             '',
-            'Halo admin, saya *'.($transaction->customer_name ?: '-').'* ingin mengonfirmasi rincian pesanan berikut:',
+            'Halo admin, saya *'.($transaction->customer_name ?: '-').'* ingin mengonfirmasi rincian booking berikut:',
             '',
             '*ID Transaksi:* #'.$transaction->id,
             '*Fasilitas:* '.$roomName,
             '*Lokasi:* '.$buildingName,
             '*Tanggal Booking:* '.$dateRange,
             '*Total Bayar:* '.$totalFormatted,
-            '',
-            '*Metode Pembayaran:* '.$paymentLabel,
-            '*Nomor VA/Rekening:* '.$paymentNumber,
-            $paymentMethod?->account_holder ? '*a.n.:* '.$paymentMethod->account_holder : null,
             '',
             '*Kontak Pemesan*',
             '*No. HP:* '.($transaction->customer_phone ?: '-'),
@@ -88,7 +78,7 @@ class UserTransactionController extends Controller
         ]);
     }
 
-    public function cancel(Request $request, Transaction $transaction)
+    public function cancel(Request $request, Transaction $transaction): \Illuminate\Http\RedirectResponse
     {
         Transaction::expirePending();
 

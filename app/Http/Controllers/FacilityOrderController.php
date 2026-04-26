@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\DataMaster;
 use App\Models\Room;
-use App\Models\PaymentMethod;
 use App\Models\Transaction;
 use App\Models\Transaction_Detail;
 use Illuminate\Http\Request;
@@ -14,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class FacilityOrderController extends Controller
 {
-    public function store(Request $request, Room $room)
+    public function store(Request $request, Room $room): \Illuminate\Http\RedirectResponse
     {
         Transaction::expirePending();
 
@@ -24,7 +23,6 @@ class FacilityOrderController extends Controller
             'customer_address' => ['required', 'string', 'max:1000'],
             'check_in_date' => ['required', 'date_format:Y-m-d'],
             'check_out_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:check_in_date'],
-            'payment_method_id' => ['nullable', 'integer'],
         ]);
 
         $checkIn = \Carbon\Carbon::createFromFormat('Y-m-d', $validated['check_in_date'])->startOfDay();
@@ -54,33 +52,11 @@ class FacilityOrderController extends Controller
         $dataMaster = DataMaster::query()->latest()->first();
         if (! $dataMaster) {
             return Redirect::back()->withErrors([
-                'data_master' => 'VA belum diatur. Hubungi admin.',
+                'data_master' => 'Kontak admin belum diatur. Hubungi admin.',
             ]);
         }
 
-        $paymentMethod = null;
-        $activeMethodsCount = PaymentMethod::query()
-            ->where('data_master_id', $dataMaster->id)
-            ->where('is_active', true)
-            ->count();
-
-        if ($activeMethodsCount > 0) {
-            $paymentMethod = PaymentMethod::query()
-                ->where('id', $validated['payment_method_id'] ?? 0)
-                ->where('data_master_id', $dataMaster->id)
-                ->where('is_active', true)
-                ->first();
-
-            if (! $paymentMethod) {
-                throw ValidationException::withMessages([
-                    'payment_method_id' => 'Metode pembayaran wajib dipilih.',
-                ]);
-            }
-        }
-
-        $paymentMethodId = $paymentMethod?->id;
-
-        $transactionId = DB::transaction(function () use ($validated, $request, $room, $totalHarga, $dataMaster, $paymentMethodId) {
+        $transactionId = DB::transaction(function () use ($validated, $request, $room, $totalHarga, $dataMaster) {
             $transaction = Transaction::create([
                 'check_in_date' => $validated['check_in_date'],
                 'check_out_date' => $validated['check_out_date'],
@@ -93,7 +69,7 @@ class FacilityOrderController extends Controller
                 'room_id' => $room->id,
                 'is_booked' => 'No',
                 'data_master_id' => $dataMaster->id,
-                'payment_method_id' => $paymentMethodId,
+                'payment_method_id' => null,
             ]);
 
             Transaction_Detail::create([
@@ -106,6 +82,6 @@ class FacilityOrderController extends Controller
         });
 
         return Redirect::route('user.transactions.show', $transactionId)
-            ->with('success', 'Pesanan berhasil dibuat. Silakan lakukan pembayaran via VA dan konfirmasi ke admin.');
+            ->with('success', 'Pesanan berhasil dibuat. Silakan konfirmasi ke admin via WhatsApp.');
     }
 }

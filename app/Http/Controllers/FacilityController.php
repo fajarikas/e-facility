@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataMaster;
-use App\Models\PaymentMethod;
 use App\Models\Room;
 use App\Models\Transaction;
 use App\Models\UserRoomLike;
@@ -139,14 +138,6 @@ class FacilityController extends Controller
         }
 
         $dataMaster = DataMaster::query()->latest()->first();
-        $paymentMethods = $dataMaster
-            ? PaymentMethod::query()
-            ->where('data_master_id', $dataMaster->id)
-            ->where('is_active', true)
-            ->orderBy('type')
-            ->orderBy('bank_name')
-            ->get()
-            : collect();
 
         $today = now()->startOfDay();
 
@@ -189,7 +180,6 @@ class FacilityController extends Controller
             'room' => $room,
             'isLiked' => $isLiked,
             'dataMaster' => $dataMaster,
-            'paymentMethods' => $paymentMethods,
             'blockedDates' => array_values(array_unique($blockedDates)),
         ]);
     }
