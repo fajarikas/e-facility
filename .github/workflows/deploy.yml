@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test # HANYA JALAN KALAU TEST SUKSES
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@master
@@ -46,7 +46,7 @@ jobs:
             # Paksa ambil kode terbaru, buang perubahan lokal yang bikin conflict
             git fetch --all
             git reset --hard origin/main
-            
+
             # Rebuild & Restart dengan paksa
             docker build --network=host -t e-facility .
             docker rm -f e-facility-app || true
@@ -56,14 +56,14 @@ jobs:
               --env-file .env \
               -v $(pwd)/storage:/var/www/storage \
               e-facility
-            
+
             # Post-deployment
-            docker exec e-facility-app php artisan migrate --force
+            # docker exec e-facility-app php artisan migrate --force
             docker exec e-facility-app php artisan config:cache
             docker exec e-facility-app php artisan route:cache
             docker exec e-facility-app php artisan view:cache
             docker exec e-facility-app php artisan storage:link
-            
+
             # Fix Permissions dari dalam Container (Tanpa Sudo VPS)
             docker exec -u root e-facility-app chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
             docker exec -u root e-facility-app chmod -R 775 /var/www/storage /var/www/bootstrap/cache
